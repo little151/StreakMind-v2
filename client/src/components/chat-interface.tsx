@@ -20,10 +20,19 @@ export default function ChatInterface() {
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate all related queries to ensure real-time updates
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       queryClient.invalidateQueries({ queryKey: ['/api/habits'] });
       queryClient.invalidateQueries({ queryKey: ['/api/habit-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recent-activities'] });
+      
+      // Force refetch of all data to ensure dashboard updates
+      queryClient.refetchQueries({ queryKey: ['/api/user'] });
+      queryClient.refetchQueries({ queryKey: ['/api/habits'] });
+      queryClient.refetchQueries({ queryKey: ['/api/habit-entries'] });
+      queryClient.refetchQueries({ queryKey: ['/api/user-badges'] });
     },
   });
 

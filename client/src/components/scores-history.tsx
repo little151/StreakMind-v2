@@ -1,19 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useRealtimeData } from "@/hooks/use-realtime-data";
 import { Code2, Dumbbell, Moon, Flame } from "lucide-react";
 import type { HabitEntry, Habit } from "@shared/schema";
 
 export default function ScoresHistory() {
-  const { data: userBadges = [] } = useQuery({
-    queryKey: ['/api/user-badges'],
-  });
-
-  const { data: habitEntries = [] } = useQuery<HabitEntry[]>({
-    queryKey: ['/api/habit-entries', { limit: 10 }],
-  });
-
-  const { data: habits = [] } = useQuery<Habit[]>({
-    queryKey: ['/api/habits'],
-  });
+  const { userBadges, habitEntries, habits } = useRealtimeData();
 
   const getBadgeIcon = (iconName: string) => {
     switch (iconName) {

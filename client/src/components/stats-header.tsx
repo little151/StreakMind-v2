@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useRealtimeData } from "@/hooks/use-realtime-data";
 import type { User } from "@shared/schema";
 import InfoModal from "./info-modal";
 
@@ -6,10 +6,11 @@ interface StatsHeaderProps {
   user?: User;
 }
 
-export default function StatsHeader({ user }: StatsHeaderProps) {
-  const { data: userBadges = [] } = useQuery({
-    queryKey: ['/api/user-badges'],
-  });
+export default function StatsHeader({ user: propUser }: StatsHeaderProps) {
+  const { user: realtimeUser, userBadges } = useRealtimeData();
+  
+  // Use realtime user data if available, otherwise fall back to prop
+  const user = realtimeUser || propUser;
 
   return (
     <div className="bg-card border-b border-border px-4 sm:px-6 py-4 sm:py-6" data-testid="stats-header">

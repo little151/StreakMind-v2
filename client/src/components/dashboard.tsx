@@ -1,14 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
-import type { Habit, HabitEntry } from "@shared/schema";
+import { useRealtimeData } from "@/hooks/use-realtime-data";
 
 export default function Dashboard() {
-  const { data: habits = [] } = useQuery<Habit[]>({
-    queryKey: ['/api/habits'],
-  });
+  const { habits, habitEntries, isLoading, isError } = useRealtimeData();
 
-  const { data: habitEntries = [] } = useQuery<HabitEntry[]>({
-    queryKey: ['/api/habit-entries'],
-  });
+  if (isLoading) {
+    return (
+      <div className="h-full p-4 sm:p-6 overflow-y-auto bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Loading dashboard...</div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="h-full p-4 sm:p-6 overflow-y-auto bg-background flex items-center justify-center">
+        <div className="text-red-500">Failed to load dashboard data</div>
+      </div>
+    );
+  }
 
   // Generate calendar heatmap data
   const generateCalendarData = (habitName: string) => {
