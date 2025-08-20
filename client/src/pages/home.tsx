@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import type { User } from "@shared/schema";
 import Sidebar from "@/components/sidebar";
 import StatsHeader from "@/components/stats-header";
 import ChatInterface from "@/components/chat-interface";
@@ -12,7 +13,7 @@ type Tab = 'chat' | 'dashboard' | 'scores' | 'settings';
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('chat');
 
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<User>({
     queryKey: ['/api/user'],
   });
 
@@ -32,7 +33,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50" data-testid="main-layout">
+    <div className="flex h-screen bg-background" data-testid="main-layout">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       
       <div className="flex-1 flex flex-col overflow-hidden">

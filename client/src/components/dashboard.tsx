@@ -63,32 +63,32 @@ export default function Dashboard() {
   const gymProgress = Math.min((gymEntries.length / 10) * 100, 100); // Target: 10 sessions
 
   return (
-    <div className="h-full p-6 overflow-y-auto" data-testid="dashboard">
+    <div className="h-full p-6 overflow-y-auto bg-background" data-testid="dashboard">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Coding Streak Calendar */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Coding Streak</h3>
-            <div className="text-sm text-gray-500">
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-foreground">Coding Streak</h3>
+            <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
               {codingHabit?.currentStreak || 0} days current
             </div>
           </div>
-          <div className="grid grid-cols-7 gap-1 text-xs text-gray-500 mb-2">
+          <div className="grid grid-cols-7 gap-1 text-xs text-muted-foreground mb-3">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-              <div key={day} className="text-center">{day}</div>
+              <div key={day} className="text-center font-medium">{day}</div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-1.5">
             {calendarData.map((day, index) => (
               <div
                 key={index}
-                className={`w-6 h-6 rounded ${
+                className={`w-7 h-7 rounded-lg transition-all duration-200 hover:scale-110 ${
                   day.intensity === 0 
-                    ? 'bg-gray-100' 
+                    ? 'bg-muted' 
                     : `bg-accent`
                 }`}
                 style={{
-                  opacity: day.intensity === 0 ? 1 : Math.max(0.2, day.intensity)
+                  opacity: day.intensity === 0 ? 1 : Math.max(0.3, day.intensity)
                 }}
                 title={`${day.date.toDateString()}: ${day.value} entries`}
               />
@@ -97,38 +97,39 @@ export default function Dashboard() {
         </div>
 
         {/* Gym Progress Circle */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Gym Sessions</h3>
-            <div className="text-sm text-gray-500">
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-foreground">Gym Sessions</h3>
+            <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
               {gymEntries.length}/10 this week
             </div>
           </div>
           <div className="flex items-center justify-center">
-            <div className="relative w-32 h-32">
-              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+            <div className="relative w-40 h-40">
+              <svg className="w-40 h-40 transform -rotate-90" viewBox="0 0 36 36">
                 <path
-                  className="text-gray-200"
+                  className="text-muted"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="3"
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
                 <path
                   className="text-accent"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="3"
                   fill="none"
                   strokeDasharray={`${gymProgress}, 100`}
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-3xl font-bold text-foreground">
                     {Math.round(gymProgress)}%
                   </div>
-                  <div className="text-xs text-gray-500">Complete</div>
+                  <div className="text-sm text-muted-foreground font-medium">Complete</div>
                 </div>
               </div>
             </div>
@@ -136,20 +137,20 @@ export default function Dashboard() {
         </div>
 
         {/* Sleep Tracking Bar Chart */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Sleep Tracking</h3>
-            <div className="text-sm text-gray-500">Last 7 days</div>
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6 lg:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-foreground">Sleep Tracking</h3>
+            <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">Last 7 days</div>
           </div>
-          <div className="flex items-end justify-between space-x-2 h-32">
+          <div className="flex items-end justify-between space-x-3 h-40">
             {sleepData.map((day, index) => (
-              <div key={index} className="flex flex-col items-center space-y-2 flex-1">
+              <div key={index} className="flex flex-col items-center space-y-3 flex-1">
                 <div
-                  className="bg-accent rounded-t w-full transition-all duration-300"
+                  className="bg-accent rounded-t-lg w-full transition-all duration-300 hover:bg-accent/80"
                   style={{ height: `${day.percentage}%` }}
                   title={`${day.day}: ${day.hours.toFixed(1)} hours`}
                 />
-                <div className="text-xs text-gray-500">{day.day}</div>
+                <div className="text-sm text-muted-foreground font-medium">{day.day}</div>
               </div>
             ))}
           </div>

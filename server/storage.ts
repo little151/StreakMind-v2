@@ -103,8 +103,13 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
     const user: User = {
-      ...insertUser,
       id,
+      username: insertUser.username,
+      password: insertUser.password,
+      totalPoints: insertUser.totalPoints ?? 0,
+      currentStreak: insertUser.currentStreak ?? 0,
+      badges: insertUser.badges ?? [],
+      settings: insertUser.settings ?? {},
       createdAt: new Date()
     };
     this.users.set(id, user);
@@ -131,8 +136,15 @@ export class MemStorage implements IStorage {
   async createHabit(insertHabit: InsertHabit): Promise<Habit> {
     const id = randomUUID();
     const habit: Habit = {
-      ...insertHabit,
       id,
+      name: insertHabit.name,
+      category: insertHabit.category,
+      userId: insertHabit.userId,
+      description: insertHabit.description ?? null,
+      pointsPerCompletion: insertHabit.pointsPerCompletion ?? 10,
+      visualizationType: insertHabit.visualizationType ?? "calendar",
+      currentStreak: insertHabit.currentStreak ?? 0,
+      isActive: insertHabit.isActive ?? true,
       createdAt: new Date()
     };
     this.habits.set(id, habit);
@@ -168,8 +180,13 @@ export class MemStorage implements IStorage {
   async createHabitEntry(insertEntry: InsertHabitEntry): Promise<HabitEntry> {
     const id = randomUUID();
     const entry: HabitEntry = {
-      ...insertEntry,
-      id
+      id,
+      userId: insertEntry.userId,
+      habitId: insertEntry.habitId,
+      value: insertEntry.value ?? 1,
+      points: insertEntry.points ?? 0,
+      date: insertEntry.date ?? new Date(),
+      metadata: insertEntry.metadata ?? {}
     };
     this.habitEntries.set(id, entry);
     return entry;
@@ -195,8 +212,11 @@ export class MemStorage implements IStorage {
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     const id = randomUUID();
     const message: Message = {
-      ...insertMessage,
       id,
+      userId: insertMessage.userId,
+      content: insertMessage.content,
+      isFromUser: insertMessage.isFromUser,
+      habitEntryId: insertMessage.habitEntryId ?? null,
       timestamp: new Date()
     };
     this.messages.set(id, message);

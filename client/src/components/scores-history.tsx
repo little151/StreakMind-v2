@@ -83,15 +83,15 @@ export default function ScoresHistory() {
     .filter(activity => activity.habit);
 
   return (
-    <div className="h-full p-6 overflow-y-auto" data-testid="scores-history">
+    <div className="h-full p-6 overflow-y-auto bg-background" data-testid="scores-history">
       <div className="max-w-4xl mx-auto">
         {/* Badges Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Badges Earned</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {userBadges.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-gray-500">
-                <p>No badges earned yet!</p>
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6 mb-6">
+          <h3 className="text-lg font-semibold text-foreground mb-6">Badges Earned</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {!Array.isArray(userBadges) || userBadges.length === 0 ? (
+              <div className="col-span-full text-center py-12 text-muted-foreground">
+                <p className="text-lg">No badges earned yet!</p>
                 <p className="text-sm mt-2">Keep tracking your habits to unlock badges.</p>
               </div>
             ) : (
@@ -100,14 +100,14 @@ export default function ScoresHistory() {
                 const colorClass = getBadgeColor(userBadge.badge?.color);
                 
                 return (
-                  <div key={userBadge.id} className="text-center">
-                    <div className={`w-16 h-16 ${colorClass} rounded-full flex items-center justify-center mx-auto mb-2`}>
+                  <div key={userBadge.id} className="text-center group">
+                    <div className={`w-16 h-16 ${colorClass} rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform`}>
                       <IconComponent className="h-8 w-8" />
                     </div>
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-foreground">
                       {userBadge.badge?.name}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground mt-1">
                       {userBadge.badge?.description}
                     </div>
                   </div>
@@ -118,12 +118,12 @@ export default function ScoresHistory() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-6">Recent Activity</h3>
           <div className="space-y-4">
             {recentActivities.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>No recent activity!</p>
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="text-lg">No recent activity!</p>
                 <p className="text-sm mt-2">Start tracking your habits in the Chat tab.</p>
               </div>
             ) : (
@@ -134,26 +134,26 @@ export default function ScoresHistory() {
                 return (
                   <div
                     key={activity.id}
-                    className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
+                    className="flex items-center justify-between py-4 px-4 rounded-xl border border-border hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 ${colorClass} rounded-full flex items-center justify-center`}>
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 ${colorClass} rounded-xl flex items-center justify-center`}>
                         <IconComponent className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900 capitalize">
+                        <div className="text-sm font-medium text-foreground capitalize">
                           {activity.habit?.name} {activity.habit?.category === 'coding' ? 'Practice' : activity.habit?.category === 'fitness' ? 'Session' : 'Tracking'}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                           {activity.value} {activity.habit?.category === 'coding' ? 'problems' : activity.habit?.category === 'fitness' ? 'session' : 'hours'} completed
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className={`text-sm font-medium ${colorClass === 'bg-accent' ? 'text-accent' : colorClass === 'bg-green-500' ? 'text-green-500' : 'text-blue-500'}`}>
+                      <div className="text-sm font-medium text-accent">
                         +{activity.points} pts
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         {new Date(activity.date).toLocaleDateString()}
                       </div>
                     </div>

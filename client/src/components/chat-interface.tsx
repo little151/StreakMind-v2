@@ -53,52 +53,57 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="h-full flex flex-col" data-testid="chat-interface">
+    <div className="h-full flex flex-col bg-background" data-testid="chat-interface">
       {/* Chat Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center text-gray-500">
-              <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-lg mb-2">Start tracking your habits!</p>
-              <p className="text-sm">Try typing: "Did 2 coding questions today" or "Mark gym done"</p>
+            <div className="text-center text-muted-foreground">
+              <Bot className="h-16 w-16 mx-auto mb-6 text-muted-foreground/60" />
+              <p className="text-xl mb-3 text-foreground font-medium">Start tracking your habits!</p>
+              <p className="text-sm">Try typing: "Did 2 coding questions today" or "Went to gym for 1 hour"</p>
             </div>
           </div>
         ) : (
           messages.map((message) => (
             <div
               key={message.id}
-              className={`flex items-end space-x-2 ${
-                message.isFromUser ? '' : 'justify-end'
+              className={`flex items-end space-x-3 ${
+                message.isFromUser ? '' : 'justify-end flex-row-reverse space-x-reverse'
               }`}
             >
               {message.isFromUser ? (
-                <div className="flex flex-col space-y-1 max-w-xs">
-                  <div className="bg-accent text-white rounded-2xl rounded-br-md px-4 py-2">
-                    {message.content}
-                  </div>
-                  <div className="text-xs text-gray-500 ml-2">
-                    {new Date(message.timestamp).toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </div>
-                </div>
-              ) : (
                 <>
-                  <div className="flex flex-col space-y-1 max-w-xs">
-                    <div className="bg-gray-100 text-gray-900 rounded-2xl rounded-bl-md px-4 py-2">
+                  <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 bg-accent-foreground rounded-full" />
+                  </div>
+                  <div className="flex flex-col space-y-1 max-w-md">
+                    <div className="bg-accent text-accent-foreground rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
                       {message.content}
                     </div>
-                    <div className="text-xs text-gray-500 mr-2 text-right">
+                    <div className="text-xs text-muted-foreground ml-2">
                       {new Date(message.timestamp).toLocaleTimeString([], { 
                         hour: '2-digit', 
                         minute: '2-digit' 
                       })}
                     </div>
                   </div>
-                  <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
-                    <Bot className="h-4 w-4 text-white" />
+                </>
+              ) : (
+                <>
+                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+                    <Bot className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex flex-col space-y-1 max-w-md">
+                    <div className="bg-card border border-border text-card-foreground rounded-2xl rounded-br-sm px-4 py-3 shadow-sm">
+                      {message.content}
+                    </div>
+                    <div className="text-xs text-muted-foreground mr-2 text-right">
+                      {new Date(message.timestamp).toLocaleTimeString([], { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </div>
                   </div>
                 </>
               )}
@@ -109,7 +114,7 @@ export default function ChatInterface() {
       </div>
 
       {/* Chat Input */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-border p-6">
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
             <Input
@@ -118,14 +123,15 @@ export default function ChatInterface() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="pr-4 py-3 rounded-full border-gray-300 focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="h-12 px-4 rounded-xl border-input bg-background focus:ring-2 focus:ring-accent focus:border-accent"
               data-testid="input-message"
             />
           </div>
           <Button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || sendMessageMutation.isPending}
-            className="bg-accent hover:bg-accent-light text-white p-3 rounded-full"
+            size="icon"
+            className="h-12 w-12 bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl"
             data-testid="button-send"
           >
             <Send className="h-4 w-4" />

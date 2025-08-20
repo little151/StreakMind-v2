@@ -254,8 +254,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { settings } = req.body;
+      const currentSettings = typeof user.settings === 'object' && user.settings !== null ? user.settings as Record<string, any> : {};
       const updatedUser = await storage.updateUser(user.id, {
-        settings: { ...user.settings, ...settings }
+        settings: { ...currentSettings, ...settings }
       });
       
       res.json(updatedUser);

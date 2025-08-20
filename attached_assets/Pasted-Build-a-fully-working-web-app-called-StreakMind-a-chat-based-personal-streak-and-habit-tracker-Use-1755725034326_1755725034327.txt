@@ -1,0 +1,85 @@
+Build a fully working web app called StreakMind, a chat-based personal streak and habit tracker. Use Next.js (React) with Tailwind CSS for the frontend, and Supabase (free tier) for database + authentication. The app must include both UI and working logic, not just design.
+
+Core Features:
+
+Chat Interface (Main Tab):
+
+Chat bubbles styled like texting.
+
+Input box at bottom with send button + 'Enter to send'.
+
+When a user types something (e.g., 'Did 2 coding questions today'), the message is:
+a) displayed instantly in chat,
+b) parsed (for now use simple keyword/regex, not advanced AI) into a structured log (activity, amount, unit, date).
+
+Assistant replies back with a short confirmation message (e.g., 'Nice! Added 2 coding questions to your streak.').
+
+All logs are saved into Supabase (Logs table).
+
+Dashboard Tab:
+
+Top: a score card showing: total points, current streak days, and badges earned.
+
+Below: multiple visualizations that auto-update from Supabase data:
+
+Calendar Heatmap for coding streaks.
+
+Circular Progress Ring for gym sessions.
+
+Bar Chart for sleep hours.
+
+Use Recharts or another free charting library.
+
+Dynamic Visualization System:
+
+Each activity has a default visualization type (heatmap, circle, bar).
+
+The user can type into chat: 'Show gym streak as a bar chart' → updates Supabase config and rerenders dashboard.
+
+At minimum, support switching between heatmap, progress circle, bar chart, line chart.
+
+Gamification Engine:
+
+Every log adds points. (Example: 10 pts per gym session, 5 pts per coding question, 1 pt per hour of sleep).
+
+Keep a streak counter: continuous daily logs = streak maintained.
+
+Show history of points in a Score History tab (timeline or list).
+
+UI/UX Details:
+
+Navigation tabs at the top: Chat | Dashboard | Scores/History | Settings.
+
+Theme Toggle (Light/Dark/Auto): must actually work by toggling Tailwind themes.
+
+Clean, minimal design: white/black background with blue accent (#3b82f6).
+
+Smooth transitions, rounded cards, subtle shadows.
+
+Show loading spinners/placeholders when fetching from Supabase.
+
+Database Schema (Supabase):
+
+Users → id, name, email.
+
+Logs → id, user_id, activity, amount, unit, date.
+
+Visualizations → id, user_id, activity, type (heatmap, circle, bar, line).
+
+Scores → id, user_id, points, reason, linked_log_id, timestamp.
+
+Readme & Setup:
+
+Add a README.md with steps: how to set up Supabase keys, how to run locally, and how to deploy.
+
+Explain where future AI parsing can be plugged in later.
+
+Important Notes:
+
+The app must be fully interactive: chat should update Supabase, dashboard must refresh with new data, theme toggle must switch instantly.
+
+Start with simple regex parsing in chat to simulate intent recognition. Advanced AI parsing will be added later.
+
+Keep code modular and commented for easy future expansion.
+
+Build the app end-to-end so it works seamlessly in Replit preview and can be deployed.

@@ -50,37 +50,37 @@ export default function Settings() {
   };
 
   return (
-    <div className="h-full p-6 overflow-y-auto" data-testid="settings">
+    <div className="h-full p-6 overflow-y-auto bg-background" data-testid="settings">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Settings</h3>
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-8">
+          <h3 className="text-lg font-semibold text-foreground mb-8">Settings</h3>
           
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Notification Preferences */}
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">
+              <Label className="text-sm font-medium text-foreground mb-4 block">
                 Notification Preferences
               </Label>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
                   <Checkbox
                     id="notifications"
                     checked={settings.notifications}
                     onCheckedChange={(checked) => handleSettingChange('notifications', checked)}
                     data-testid="checkbox-notifications"
                   />
-                  <Label htmlFor="notifications" className="text-sm text-gray-600">
+                  <Label htmlFor="notifications" className="text-sm text-muted-foreground">
                     Daily streak reminders
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   <Checkbox
                     id="weeklyReports"
                     checked={settings.weeklyReports}
                     onCheckedChange={(checked) => handleSettingChange('weeklyReports', checked)}
                     data-testid="checkbox-weekly-reports"
                   />
-                  <Label htmlFor="weeklyReports" className="text-sm text-gray-600">
+                  <Label htmlFor="weeklyReports" className="text-sm text-muted-foreground">
                     Weekly progress reports
                   </Label>
                 </div>
@@ -89,14 +89,14 @@ export default function Settings() {
 
             {/* Theme */}
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">
+              <Label className="text-sm font-medium text-foreground mb-3 block">
                 Theme
               </Label>
               <Select
                 value={settings.theme}
                 onValueChange={(value) => handleSettingChange('theme', value)}
               >
-                <SelectTrigger className="w-full" data-testid="select-theme">
+                <SelectTrigger className="w-full h-12" data-testid="select-theme">
                   <SelectValue placeholder="Select theme" />
                 </SelectTrigger>
                 <SelectContent>
@@ -109,14 +109,14 @@ export default function Settings() {
 
             {/* Default Visualization */}
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">
+              <Label className="text-sm font-medium text-foreground mb-3 block">
                 Default Visualization
               </Label>
               <Select
                 value={settings.defaultVisualization}
                 onValueChange={(value) => handleSettingChange('defaultVisualization', value)}
               >
-                <SelectTrigger className="w-full" data-testid="select-visualization">
+                <SelectTrigger className="w-full h-12" data-testid="select-visualization">
                   <SelectValue placeholder="Select visualization" />
                 </SelectTrigger>
                 <SelectContent>
@@ -129,25 +129,25 @@ export default function Settings() {
 
             {/* User Stats */}
             {user && (
-              <div className="pt-6 border-t border-gray-200">
-                <h4 className="text-md font-medium text-gray-900 mb-4">Account Stats</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="pt-6 border-t border-border">
+                <h4 className="text-md font-medium text-foreground mb-6">Account Stats</h4>
+                <div className="grid grid-cols-2 gap-6 text-sm">
                   <div>
-                    <div className="text-gray-500">Member since</div>
-                    <div className="font-medium">
+                    <div className="text-muted-foreground">Member since</div>
+                    <div className="font-medium text-foreground mt-1">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </div>
                   </div>
                   <div>
-                    <div className="text-gray-500">Total Points</div>
-                    <div className="font-medium text-accent">{user.totalPoints}</div>
+                    <div className="text-muted-foreground">Total Points</div>
+                    <div className="font-medium text-accent text-lg mt-1">{user.totalPoints}</div>
                   </div>
                 </div>
               </div>
             )}
 
             {updateSettingsMutation.isPending && (
-              <div className="text-sm text-gray-500">Saving settings...</div>
+              <div className="text-sm text-muted-foreground bg-muted px-3 py-2 rounded-lg">Saving settings...</div>
             )}
           </div>
         </div>
