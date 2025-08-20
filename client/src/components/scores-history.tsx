@@ -83,7 +83,7 @@ export default function ScoresHistory() {
     .filter(activity => activity.habit);
 
   return (
-    <div className="h-full p-6 overflow-y-auto bg-background" data-testid="scores-history">
+    <div className="h-full p-4 sm:p-6 overflow-y-auto bg-background" data-testid="scores-history">
       <div className="max-w-4xl mx-auto">
         {/* Points & Scoring Rules */}
         <div className="bg-card rounded-2xl shadow-sm border border-border p-6 mb-6">

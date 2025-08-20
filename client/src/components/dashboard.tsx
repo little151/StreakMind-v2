@@ -63,8 +63,8 @@ export default function Dashboard() {
   const gymProgress = Math.min((gymEntries.length / 10) * 100, 100); // Target: 10 sessions
 
   return (
-    <div className="h-full p-6 overflow-y-auto bg-background" data-testid="dashboard">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="h-full p-4 sm:p-6 overflow-y-auto bg-background" data-testid="dashboard">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Coding Streak Calendar */}
         <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
           <div className="flex items-center justify-between mb-6">

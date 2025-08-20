@@ -4,7 +4,7 @@
       "id": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
       "username": "demo",
       "password": "demo",
-      "totalPoints": 2660,
+      "totalPoints": 2740,
       "currentStreak": 13,
       "badges": [],
       "settings": {
@@ -616,6 +616,39 @@
       "metadata": {
         "originalMessage": "Did 4 coding problems today"
       }
+    },
+    "eed1c372-f475-4055-9b5c-a084a762ede6": {
+      "id": "eed1c372-f475-4055-9b5c-a084a762ede6",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "habitId": "a9b92ee6-c905-4122-943a-83b0b0035374",
+      "value": 1,
+      "points": 20,
+      "date": "2025-08-20T22:57:57.761Z",
+      "metadata": {
+        "originalMessage": "did 1 coding"
+      }
+    },
+    "322373c4-04df-4b9f-ab7d-e8a599ce19d4": {
+      "id": "322373c4-04df-4b9f-ab7d-e8a599ce19d4",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "habitId": "b8c82ff7-d016-5233-a54b-f4c1c1146485",
+      "value": 1,
+      "points": 30,
+      "date": "2025-08-20T22:58:21.121Z",
+      "metadata": {
+        "originalMessage": "Went to gym for 1 hour"
+      }
+    },
+    "b5ab385a-be2e-44df-9933-d20f343b949c": {
+      "id": "b5ab385a-be2e-44df-9933-d20f343b949c",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "habitId": "b8c82ff7-d016-5233-a54b-f4c1c1146485",
+      "value": 1,
+      "points": 30,
+      "date": "2025-08-20T23:07:16.751Z",
+      "metadata": {
+        "originalMessage": "Went to gym for 45 minutes today"
+      }
     }
   },
   "messages": {
@@ -746,6 +779,54 @@
       "isFromUser": false,
       "habitEntryId": "9baf5594-72c2-44a1-8139-8e29cdd016fe",
       "timestamp": "2025-08-20T22:55:59.995Z"
+    },
+    "43d35a9f-49e4-4e37-844e-922fa0ddb750": {
+      "id": "43d35a9f-49e4-4e37-844e-922fa0ddb750",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "did 1 coding",
+      "isFromUser": true,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:57:57.760Z"
+    },
+    "c99c2682-2f1a-4a8c-9cbe-478f24edd7fc": {
+      "id": "c99c2682-2f1a-4a8c-9cbe-478f24edd7fc",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Code master! 1 solutions created. Every problem you solve makes you stronger! +20 points. Extra logging today - love the enthusiasm!",
+      "isFromUser": false,
+      "habitEntryId": "eed1c372-f475-4055-9b5c-a084a762ede6",
+      "timestamp": "2025-08-20T22:57:57.761Z"
+    },
+    "4f3b2b04-3748-46eb-883f-ccaf20ea5cac": {
+      "id": "4f3b2b04-3748-46eb-883f-ccaf20ea5cac",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Went to gym for 1 hour",
+      "isFromUser": true,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:58:21.120Z"
+    },
+    "aca01f74-ea20-47da-b3f4-88f901d9eecc": {
+      "id": "aca01f74-ea20-47da-b3f4-88f901d9eecc",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Fitness hero! Another session done. Your commitment to wellness inspires me! +30 points. Extra logging today - love the enthusiasm!",
+      "isFromUser": false,
+      "habitEntryId": "322373c4-04df-4b9f-ab7d-e8a599ce19d4",
+      "timestamp": "2025-08-20T22:58:21.121Z"
+    },
+    "d431ce66-d88e-4755-b3de-eb93e805aee1": {
+      "id": "d431ce66-d88e-4755-b3de-eb93e805aee1",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Went to gym for 45 minutes today",
+      "isFromUser": true,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T23:07:16.751Z"
+    },
+    "e5194fbd-d2cd-42a4-8282-dc0ef409aed2": {
+      "id": "e5194fbd-d2cd-42a4-8282-dc0ef409aed2",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Fitness champion! Another powerful workout complete. Your body is getting stronger every day! +30 points. Extra logging today - love the enthusiasm!",
+      "isFromUser": false,
+      "habitEntryId": "b5ab385a-be2e-44df-9933-d20f343b949c",
+      "timestamp": "2025-08-20T23:07:16.751Z"
     }
   },
   "badges": {

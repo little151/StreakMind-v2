@@ -55,69 +55,69 @@ export default function ChatInterface() {
   return (
     <div className="h-full flex flex-col bg-background" data-testid="chat-interface">
       {/* Chat Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center text-muted-foreground">
-              <Bot className="h-16 w-16 mx-auto mb-6 text-muted-foreground/60" />
-              <p className="text-xl mb-3 text-foreground font-medium">Start tracking your habits!</p>
+            <div className="text-center text-muted-foreground px-4">
+              <Bot className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 sm:mb-6 text-muted-foreground/60" />
+              <p className="text-lg sm:text-xl mb-3 text-foreground font-medium">Start tracking your habits!</p>
               <p className="text-sm">Try typing: "Did 2 coding questions today" or "Went to gym for 1 hour"</p>
             </div>
           </div>
         ) : (
-          messages.map((message) => (
+          <div className="space-y-2">
+            {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex items-end space-x-3 ${
-                message.isFromUser ? 'justify-end flex-row-reverse space-x-reverse' : ''
+              className={`flex items-start gap-3 mb-4 ${
+                message.isFromUser ? 'flex-row-reverse' : 'flex-row'
               }`}
               data-testid={`message-${message.isFromUser ? 'user' : 'bot'}-${message.id}`}
             >
-              {message.isFromUser ? (
-                <>
-                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-primary-foreground rounded-full" />
-                  </div>
-                  <div className="flex flex-col space-y-1 max-w-md">
-                    <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-3 shadow-sm">
-                      {message.content}
-                    </div>
-                    <div className="text-xs text-muted-foreground mr-2 text-right">
-                      {new Date(message.timestamp).toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
-                    <Bot className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex flex-col space-y-1 max-w-md">
-                    <div className="bg-card border border-border text-card-foreground rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
-                      {message.content}
-                    </div>
-                    <div className="text-xs text-muted-foreground ml-2">
-                      {new Date(message.timestamp).toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </div>
-                  </div>
-                </>
-              )}
+              {/* Avatar */}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                message.isFromUser 
+                  ? 'bg-primary' 
+                  : 'bg-muted'
+              }`}>
+                {message.isFromUser ? (
+                  <div className="w-2 h-2 bg-primary-foreground rounded-full" />
+                ) : (
+                  <Bot className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+
+              {/* Message bubble */}
+              <div className={`flex flex-col max-w-[70%] sm:max-w-md ${
+                message.isFromUser ? 'items-end' : 'items-start'
+              }`}>
+                <div className={`px-4 py-3 rounded-2xl shadow-sm break-words ${
+                  message.isFromUser
+                    ? 'bg-primary text-primary-foreground rounded-br-md'
+                    : 'bg-card border border-border text-card-foreground rounded-bl-md'
+                }`}>
+                  {message.content}
+                </div>
+                <div className={`text-xs text-muted-foreground mt-1 px-1 ${
+                  message.isFromUser ? 'text-right' : 'text-left'
+                }`}>
+                  {new Date(message.timestamp).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                </div>
+              </div>
             </div>
-          ))
+            ))}
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Chat Input */}
-      <div className="border-t border-border p-6">
-        <div className="flex items-center space-x-3">
-          <div className="flex-1 relative">
+      <div className="border-t border-border p-4 sm:p-6">
+        <div className="flex items-end gap-3 max-w-4xl mx-auto">
+          <div className="flex-1">
             <Input
               type="text"
               placeholder="Type your habit update... (e.g., 'Did 30 min meditation')"
