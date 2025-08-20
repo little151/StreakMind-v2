@@ -85,6 +85,58 @@ export default function ScoresHistory() {
   return (
     <div className="h-full p-6 overflow-y-auto bg-background" data-testid="scores-history">
       <div className="max-w-4xl mx-auto">
+        {/* Points & Scoring Rules */}
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6 mb-6">
+          <h3 className="text-lg font-semibold text-foreground mb-6">Scoring System</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium text-foreground mb-3">Points per Activity</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">🚀 Coding (per problem)</span>
+                  <span className="font-medium text-accent">20 points</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">💪 Fitness (per session)</span>
+                  <span className="font-medium text-green-500">30 points</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">😴 Sleep (per log)</span>
+                  <span className="font-medium text-blue-500">10 points</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">📚 Learning (per session)</span>
+                  <span className="font-medium text-purple-500">15 points</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium text-foreground mb-3">Streak & Badge Rules</h4>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🔥</span>
+                  <span>3-day streak badge</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">⭐</span>
+                  <span>7-day streak badge</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">💎</span>
+                  <span>21-day streak badge</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">👑</span>
+                  <span>30-day streak badge</span>
+                </div>
+                <div className="text-xs mt-3 text-muted-foreground/80">
+                  * Streaks count consecutive days, not individual logs
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Badges Section */}
         <div className="bg-card rounded-2xl shadow-sm border border-border p-6 mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-6">Badges Earned</h3>

@@ -52,35 +52,68 @@ function parseHabitMessage(content: string): { habitName: string; value: number;
 }
 
 // Helper function to generate AI responses
-function generateAIResponse(habitName: string, value: number, points: number): string {
+function generateAIResponse(habitName: string, value: number, points: number, isFirstToday: boolean, currentStreak: number): string {
+  // Streak milestone messages
+  const streakMessages = {
+    3: "Amazing! You're on a 3-day streak! The habit formation is starting to stick!",
+    7: "Incredible! 7 days straight! You're building real momentum now!",
+    10: "Outstanding! 10-day streak! You're becoming unstoppable!",
+    21: "Phenomenal! 21 days! You've formed a powerful habit pattern!",
+    30: "Legendary! 30-day streak! You're a true habit master!"
+  };
+
+  const streakBonus = streakMessages[currentStreak as keyof typeof streakMessages];
+  
+  const motivationalPhrases = [
+    "You're doing amazing!", "Keep up the fantastic work!", "I'm so proud of your consistency!",
+    "Your dedication is inspiring!", "You're building the best version of yourself!",
+    "Every step counts on this journey!", "Your future self will thank you!",
+    "This is how champions are made!", "Consistency is your superpower!"
+  ];
+
   const responses = {
     coding: [
-      `Coding master in action! ${value} problems solved. Keep that streak going! +${points} points.`,
-      `Awesome coding session! ${value} challenges conquered. You're on fire! +${points} points.`,
-      `Great job! ${value} problems down. Your coding skills are improving! +${points} points.`
+      `Code warrior! ${value} problems conquered today. Your problem-solving skills are sharpening! +${points} points.`,
+      `Tech genius at work! ${value} challenges completed. You're becoming a coding machine! +${points} points.`,
+      `Brilliant work! ${value} problems solved. Your programming journey is so inspiring! +${points} points.`,
+      `Code master! ${value} solutions created. Every problem you solve makes you stronger! +${points} points.`
     ],
     gym: [
-      `Gym warrior! Another solid workout in the books. Stay strong! +${points} points.`,
-      `Fitness goal achieved! You're building those healthy habits. +${points} points.`,
-      `Great workout session! Your dedication is paying off. +${points} points.`
+      `Fitness champion! Another powerful workout complete. Your body is getting stronger every day! +${points} points.`,
+      `Warrior mode activated! That workout was incredible. You're transforming into your best self! +${points} points.`,
+      `Beast mode! Workout crushed today. Your dedication to health is absolutely amazing! +${points} points.`,
+      `Fitness hero! Another session done. Your commitment to wellness inspires me! +${points} points.`
     ],
     sleep: [
-      `Good sleep habits! ${value} hours of rest logged. Sweet dreams! +${points} points.`,
-      `Rest and recovery tracked! ${value} hours of quality sleep. +${points} points.`,
-      `Sleep goal achieved! ${value} hours will help you perform better tomorrow. +${points} points.`
+      `Sleep champion! ${value} hours of quality rest achieved. Recovery is just as important as action! +${points} points.`,
+      `Rest and recharge complete! ${value} hours of healing sleep. Your body will thank you tomorrow! +${points} points.`,
+      `Sleep master! ${value} hours logged. Good rest fuels great days ahead! +${points} points.`,
+      `Recovery hero! ${value} hours of restoration. Sleep is where the magic happens! +${points} points.`
     ],
     reading: [
-      `Knowledge gained! Reading session completed. Keep learning! +${points} points.`,
-      `Great reading habit! Your mind is growing stronger. +${points} points.`,
-      `Reading milestone achieved! Expanding your knowledge pays off. +${points} points.`
+      `Knowledge seeker! Reading session complete. Your mind is expanding with every page! +${points} points.`,
+      `Wisdom warrior! Another learning milestone achieved. Books are your gateway to growth! +${points} points.`,
+      `Learning legend! Reading time invested wisely. Knowledge is the best investment! +${points} points.`,
+      `Mind builder! Reading session done. You're feeding your brain the best fuel! +${points} points.`
     ]
   };
   
   const categoryResponses = responses[habitName as keyof typeof responses] || [
-    `Habit tracked! Great job staying consistent. +${points} points.`
+    `Habit champion! Goal achieved today. Your consistency is building something beautiful! +${points} points.`
   ];
   
-  return categoryResponses[Math.floor(Math.random() * categoryResponses.length)];
+  let message = categoryResponses[Math.floor(Math.random() * categoryResponses.length)];
+  
+  // Add streak celebration if milestone reached
+  if (streakBonus && isFirstToday) {
+    message += ` ${streakBonus}`;
+  } else if (isFirstToday && currentStreak > 1) {
+    message += ` Day ${currentStreak} streak! ${motivationalPhrases[Math.floor(Math.random() * motivationalPhrases.length)]}`;
+  } else if (!isFirstToday) {
+    message += ` Extra logging today - love the enthusiasm!`;
+  }
+  
+  return message;
 }
 
 // User routes
@@ -222,6 +255,15 @@ router.post("/messages", (req, res) => {
       data.habits[habitId] = habit;
     }
 
+    // Check if user already logged this habit today
+    const today = new Date().toDateString();
+    const todayEntries = Object.values(data.habitEntries)
+      .filter((entry: any) => 
+        entry.userId === DEFAULT_USER_ID && 
+        entry.habitId === (habit as any).id && 
+        new Date(entry.date).toDateString() === today
+      );
+
     // Calculate points
     const points = (habit as any).pointsPerCompletion * habitInfo.value;
 
@@ -239,15 +281,35 @@ router.post("/messages", (req, res) => {
     
     data.habitEntries[entryId] = habitEntry;
 
-    // Update user points
+    // Update user points and streak (only if first entry today)
     const user = data.users[DEFAULT_USER_ID];
     if (user) {
       user.totalPoints = (user.totalPoints || 0) + points;
-      user.currentStreak = (user.currentStreak || 0) + 1;
+      
+      // Only increment streak if this is the first habit entry today
+      if (todayEntries.length === 0) {
+        // Check if user logged yesterday to maintain streak
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayString = yesterday.toDateString();
+        
+        const yesterdayEntries = Object.values(data.habitEntries)
+          .filter((entry: any) => 
+            entry.userId === DEFAULT_USER_ID && 
+            new Date(entry.date).toDateString() === yesterdayString
+          );
+        
+        if (yesterdayEntries.length > 0 || user.currentStreak === 0) {
+          user.currentStreak = (user.currentStreak || 0) + 1;
+        } else {
+          user.currentStreak = 1; // Reset streak if gap found
+        }
+      }
     }
 
     // Generate AI response
-    const aiResponse = generateAIResponse(habitInfo.habitName, habitInfo.value, points);
+    const isFirstToday = todayEntries.length === 0;
+    const aiResponse = generateAIResponse(habitInfo.habitName, habitInfo.value, points, isFirstToday, user?.currentStreak || 0);
     const aiMessageId = randomUUID();
     aiMessage = {
       id: aiMessageId,

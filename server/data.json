@@ -4,8 +4,8 @@
       "id": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
       "username": "demo",
       "password": "demo",
-      "totalPoints": 2510,
-      "currentStreak": 9,
+      "totalPoints": 2660,
+      "currentStreak": 13,
       "badges": [],
       "settings": {
         "theme": "light",
@@ -572,6 +572,50 @@
       "metadata": {
         "originalMessage": "Did 3 coding questions today"
       }
+    },
+    "d6adc8df-83e1-47ae-8d72-a8cc9d7096de": {
+      "id": "d6adc8df-83e1-47ae-8d72-a8cc9d7096de",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "habitId": "b8c82ff7-d016-5233-a54b-f4c1c1146485",
+      "value": 1,
+      "points": 30,
+      "date": "2025-08-20T22:33:08.045Z",
+      "metadata": {
+        "originalMessage": "went to gym for 3 hours"
+      }
+    },
+    "feb7b6c3-cb19-4a8f-8775-e80c657ba55d": {
+      "id": "feb7b6c3-cb19-4a8f-8775-e80c657ba55d",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "habitId": "a9b92ee6-c905-4122-943a-83b0b0035374",
+      "value": 1,
+      "points": 20,
+      "date": "2025-08-20T22:33:44.387Z",
+      "metadata": {
+        "originalMessage": "did 3 coding today"
+      }
+    },
+    "3da13861-8053-47ff-9b3b-c0a402e5f6e8": {
+      "id": "3da13861-8053-47ff-9b3b-c0a402e5f6e8",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "habitId": "a9b92ee6-c905-4122-943a-83b0b0035374",
+      "value": 1,
+      "points": 20,
+      "date": "2025-08-20T22:35:59.926Z",
+      "metadata": {
+        "originalMessage": "did 10 coding today"
+      }
+    },
+    "9baf5594-72c2-44a1-8139-8e29cdd016fe": {
+      "id": "9baf5594-72c2-44a1-8139-8e29cdd016fe",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "habitId": "a9b92ee6-c905-4122-943a-83b0b0035374",
+      "value": 4,
+      "points": 80,
+      "date": "2025-08-20T22:55:59.995Z",
+      "metadata": {
+        "originalMessage": "Did 4 coding problems today"
+      }
     }
   },
   "messages": {
@@ -606,6 +650,102 @@
       "isFromUser": false,
       "habitEntryId": "dbf9c7bc-9c6f-4dfd-a81a-fd59262ac1fc",
       "timestamp": "2025-08-20T22:25:54.164Z"
+    },
+    "f7642cec-8d8a-417a-bbbf-7c18b9b96162": {
+      "id": "f7642cec-8d8a-417a-bbbf-7c18b9b96162",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "well hi",
+      "isFromUser": true,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:32:51.355Z"
+    },
+    "4e23d8bf-3fbd-45ca-acdb-692c28b5a011": {
+      "id": "4e23d8bf-3fbd-45ca-acdb-692c28b5a011",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "I didn't quite catch that habit. Try something like 'Did 3 coding questions today' or 'Went to gym for 1 hour'.",
+      "isFromUser": false,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:32:51.355Z"
+    },
+    "455cfad5-2d66-4445-aa49-66dc0ac26d47": {
+      "id": "455cfad5-2d66-4445-aa49-66dc0ac26d47",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "went to gym for 3 hours",
+      "isFromUser": true,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:33:08.045Z"
+    },
+    "faa1a27a-1004-44da-86b3-1eb1b9441a6d": {
+      "id": "faa1a27a-1004-44da-86b3-1eb1b9441a6d",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Fitness goal achieved! You're building those healthy habits. +30 points.",
+      "isFromUser": false,
+      "habitEntryId": "d6adc8df-83e1-47ae-8d72-a8cc9d7096de",
+      "timestamp": "2025-08-20T22:33:08.045Z"
+    },
+    "d7d75443-f96d-41c8-a9e3-32d396ac1942": {
+      "id": "d7d75443-f96d-41c8-a9e3-32d396ac1942",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "did 3 coding today",
+      "isFromUser": true,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:33:44.387Z"
+    },
+    "de8c2d48-d84f-4110-ae36-fb2265f220a1": {
+      "id": "de8c2d48-d84f-4110-ae36-fb2265f220a1",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Awesome coding session! 1 challenges conquered. You're on fire! +20 points.",
+      "isFromUser": false,
+      "habitEntryId": "feb7b6c3-cb19-4a8f-8775-e80c657ba55d",
+      "timestamp": "2025-08-20T22:33:44.387Z"
+    },
+    "e744eb19-5354-42a4-948b-d5316ca4244f": {
+      "id": "e744eb19-5354-42a4-948b-d5316ca4244f",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "did 30 minutes of meditation",
+      "isFromUser": true,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:35:42.487Z"
+    },
+    "498fe5d3-070a-4bcb-97b8-66f68bf8347d": {
+      "id": "498fe5d3-070a-4bcb-97b8-66f68bf8347d",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "I didn't quite catch that habit. Try something like 'Did 3 coding questions today' or 'Went to gym for 1 hour'.",
+      "isFromUser": false,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:35:42.487Z"
+    },
+    "8110a2e9-99c4-4a33-a7f9-285c897c8185": {
+      "id": "8110a2e9-99c4-4a33-a7f9-285c897c8185",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "did 10 coding today",
+      "isFromUser": true,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:35:59.925Z"
+    },
+    "044511e3-279f-4cec-92e1-9bd39e4c706f": {
+      "id": "044511e3-279f-4cec-92e1-9bd39e4c706f",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Awesome coding session! 1 challenges conquered. You're on fire! +20 points.",
+      "isFromUser": false,
+      "habitEntryId": "3da13861-8053-47ff-9b3b-c0a402e5f6e8",
+      "timestamp": "2025-08-20T22:35:59.926Z"
+    },
+    "755f6851-43f1-42f0-ace5-bb798acb71aa": {
+      "id": "755f6851-43f1-42f0-ace5-bb798acb71aa",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Did 4 coding problems today",
+      "isFromUser": true,
+      "habitEntryId": null,
+      "timestamp": "2025-08-20T22:55:59.995Z"
+    },
+    "7aa9dfb3-2660-462e-af59-31766a7203c8": {
+      "id": "7aa9dfb3-2660-462e-af59-31766a7203c8",
+      "userId": "cf966abd-1a85-4221-8f8b-e82dafc26c15",
+      "content": "Coding master in action! 4 problems solved. Keep that streak going! +80 points.",
+      "isFromUser": false,
+      "habitEntryId": "9baf5594-72c2-44a1-8139-8e29cdd016fe",
+      "timestamp": "2025-08-20T22:55:59.995Z"
     }
   },
   "badges": {

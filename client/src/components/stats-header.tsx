@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
+import InfoModal from "./info-modal";
 
 interface StatsHeaderProps {
   user?: User;
@@ -13,7 +14,10 @@ export default function StatsHeader({ user }: StatsHeaderProps) {
   return (
     <div className="bg-card border-b border-border px-6 py-6" data-testid="stats-header">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">StreakMind Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold text-foreground">StreakMind Dashboard</h1>
+          <InfoModal />
+        </div>
         <div className="flex items-center space-x-8">
           <div className="text-center">
             <div className="text-2xl font-bold text-accent" data-testid="total-points">

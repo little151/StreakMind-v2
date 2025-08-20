@@ -69,19 +69,20 @@ export default function ChatInterface() {
             <div
               key={message.id}
               className={`flex items-end space-x-3 ${
-                message.isFromUser ? '' : 'justify-end flex-row-reverse space-x-reverse'
+                message.isFromUser ? 'justify-end flex-row-reverse space-x-reverse' : ''
               }`}
+              data-testid={`message-${message.isFromUser ? 'user' : 'bot'}-${message.id}`}
             >
               {message.isFromUser ? (
                 <>
-                  <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-accent-foreground rounded-full" />
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 bg-primary-foreground rounded-full" />
                   </div>
                   <div className="flex flex-col space-y-1 max-w-md">
-                    <div className="bg-accent text-accent-foreground rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+                    <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-3 shadow-sm">
                       {message.content}
                     </div>
-                    <div className="text-xs text-muted-foreground ml-2">
+                    <div className="text-xs text-muted-foreground mr-2 text-right">
                       {new Date(message.timestamp).toLocaleTimeString([], { 
                         hour: '2-digit', 
                         minute: '2-digit' 
@@ -95,10 +96,10 @@ export default function ChatInterface() {
                     <Bot className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="flex flex-col space-y-1 max-w-md">
-                    <div className="bg-card border border-border text-card-foreground rounded-2xl rounded-br-sm px-4 py-3 shadow-sm">
+                    <div className="bg-card border border-border text-card-foreground rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
                       {message.content}
                     </div>
-                    <div className="text-xs text-muted-foreground mr-2 text-right">
+                    <div className="text-xs text-muted-foreground ml-2">
                       {new Date(message.timestamp).toLocaleTimeString([], { 
                         hour: '2-digit', 
                         minute: '2-digit' 
