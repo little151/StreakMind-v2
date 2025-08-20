@@ -1,270 +1,314 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { insertHabitSchema, insertHabitEntrySchema, insertMessageSchema } from "@shared/schema";
-import { z } from "zod";
+import { Router } from "express";
+import fs from "fs";
+import { randomUUID } from "crypto";
 
-// Simple NLP for habit recognition
-function parseHabitMessage(message: string): { habit: string; value: number; category: string } | null {
-  const lower = message.toLowerCase();
+const router = Router();
+const DATA_FILE = "./server/data.json";
+
+// Default user ID for demo purposes
+const DEFAULT_USER_ID = "cf966abd-1a85-4221-8f8b-e82dafc26c15";
+
+// Helper functions to read/write JSON data
+function loadData() {
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  } catch {
+    return { users: {}, habits: {}, habitEntries: {}, messages: {}, badges: {}, userBadges: {} };
+  }
+}
+
+function saveData(data: any) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
+// Helper function to parse natural language habit messages
+function parseHabitMessage(content: string): { habitName: string; value: number; category: string } | null {
+  const text = content.toLowerCase();
   
   // Coding patterns
-  if (lower.includes('coding') || lower.includes('code') || lower.includes('question') || lower.includes('problem')) {
-    const match = lower.match(/(\d+)\s*(?:coding\s*)?(?:question|problem)/);
-    const value = match ? parseInt(match[1]) : 1;
-    return { habit: 'coding', value, category: 'coding' };
+  if (text.includes('coding') || text.includes('leetcode') || text.includes('problems') || text.includes('algorithm')) {
+    const match = text.match(/(\d+)\s*(?:coding|leetcode|algorithm)?\s*(?:problems?|questions?|challenges?)/);
+    return { habitName: 'coding', value: match ? parseInt(match[1]) : 1, category: 'coding' };
   }
   
   // Gym patterns
-  if (lower.includes('gym') || lower.includes('workout') || lower.includes('exercise')) {
-    const match = lower.match(/(\d+)\s*(?:hour|hr|min)/);
-    const value = match ? parseInt(match[1]) : 1;
-    return { habit: 'gym', value, category: 'fitness' };
+  if (text.includes('gym') || text.includes('workout') || text.includes('exercise')) {
+    return { habitName: 'gym', value: 1, category: 'fitness' };
   }
   
   // Sleep patterns
-  if (lower.includes('sleep') || lower.includes('slept')) {
-    const match = lower.match(/(\d+)\s*(?:hour|hr)/);
-    const value = match ? parseInt(match[1]) : 8;
-    return { habit: 'sleep', value, category: 'sleep' };
+  if (text.includes('sleep') || text.includes('slept')) {
+    const match = text.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?)/);
+    return { habitName: 'sleep', value: match ? parseFloat(match[1]) : 8, category: 'sleep' };
   }
   
   // Reading patterns
-  if (lower.includes('read') || lower.includes('book')) {
-    const match = lower.match(/(\d+)\s*(?:page|chapter|book)/);
-    const value = match ? parseInt(match[1]) : 1;
-    return { habit: 'reading', value, category: 'learning' };
+  if (text.includes('read') || text.includes('reading') || text.includes('book')) {
+    const match = text.match(/(\d+)\s*(?:minutes?|mins?|hours?|hrs?)/);
+    return { habitName: 'reading', value: 1, category: 'learning' };
   }
   
   return null;
 }
 
-function generateAIResponse(habitName: string, value: number, streak: number, points: number): string {
+// Helper function to generate AI responses
+function generateAIResponse(habitName: string, value: number, points: number): string {
   const responses = {
     coding: [
-      `Awesome! 🎉 Your coding streak is now ${streak} days! +${points} points earned.`,
-      `Great work on those ${value} coding problems! 💻 Streak: ${streak} days. +${points} points!`,
-      `Coding master in action! ${value} problems solved. ${streak} day streak! +${points} points.`
+      `Coding master in action! ${value} problems solved. Keep that streak going! +${points} points.`,
+      `Awesome coding session! ${value} challenges conquered. You're on fire! +${points} points.`,
+      `Great job! ${value} problems down. Your coding skills are improving! +${points} points.`
     ],
     gym: [
-      `Great job! 💪 Gym streak: ${streak} days. You're crushing it! +${points} points.`,
-      `Workout complete! 🏋️ ${streak} days strong. +${points} points earned.`,
-      `Fitness warrior! ${streak} day gym streak. Keep it up! +${points} points.`
+      `Gym warrior! Another solid workout in the books. Stay strong! +${points} points.`,
+      `Fitness goal achieved! You're building those healthy habits. +${points} points.`,
+      `Great workout session! Your dedication is paying off. +${points} points.`
     ],
     sleep: [
-      `Good sleep! 😴 ${value} hours logged. ${streak} day streak! +${points} points.`,
-      `Rest well earned! 🌙 Sleep streak: ${streak} days. +${points} points.`,
-      `Sleep champion! ${value} hours tracked. ${streak} days consistent! +${points} points.`
+      `Good sleep habits! ${value} hours of rest logged. Sweet dreams! +${points} points.`,
+      `Rest and recovery tracked! ${value} hours of quality sleep. +${points} points.`,
+      `Sleep goal achieved! ${value} hours will help you perform better tomorrow. +${points} points.`
     ],
     reading: [
-      `Knowledge gained! 📚 Reading streak: ${streak} days. +${points} points.`,
-      `Great reading! 📖 ${value} progress logged. ${streak} day streak! +${points} points.`,
-      `Bookworm mode! 📚 ${streak} days of consistent reading. +${points} points.`
+      `Knowledge gained! Reading session completed. Keep learning! +${points} points.`,
+      `Great reading habit! Your mind is growing stronger. +${points} points.`,
+      `Reading milestone achieved! Expanding your knowledge pays off. +${points} points.`
     ]
   };
   
-  const habitResponses = responses[habitName as keyof typeof responses] || [
-    `Excellent! ${habitName} completed. ${streak} day streak! +${points} points.`
+  const categoryResponses = responses[habitName as keyof typeof responses] || [
+    `Habit tracked! Great job staying consistent. +${points} points.`
   ];
   
-  return habitResponses[Math.floor(Math.random() * habitResponses.length)];
+  return categoryResponses[Math.floor(Math.random() * categoryResponses.length)];
 }
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  // Get current user (demo user for now)
-  app.get("/api/user", async (req, res) => {
-    try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      res.json(user);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get user" });
+// User routes
+router.get("/user", (req, res) => {
+  const data = loadData();
+  const user = data.users[DEFAULT_USER_ID];
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+  res.json(user);
+});
+
+router.patch("/user", (req, res) => {
+  const data = loadData();
+  const user = data.users[DEFAULT_USER_ID];
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+  
+  const updatedUser = { ...user, ...req.body };
+  data.users[DEFAULT_USER_ID] = updatedUser;
+  saveData(data);
+  res.json(updatedUser);
+});
+
+// Habit routes
+router.get("/habits", (req, res) => {
+  const data = loadData();
+  const habits = Object.values(data.habits).filter((habit: any) => habit.userId === DEFAULT_USER_ID);
+  res.json(habits);
+});
+
+router.post("/habits", (req, res) => {
+  const data = loadData();
+  const habitId = randomUUID();
+  const habit = {
+    id: habitId,
+    ...req.body,
+    userId: DEFAULT_USER_ID,
+    createdAt: new Date().toISOString()
+  };
+  
+  data.habits[habitId] = habit;
+  saveData(data);
+  res.json(habit);
+});
+
+// Habit entry routes
+router.get("/habit-entries", (req, res) => {
+  const data = loadData();
+  const { habitId, limit } = req.query;
+  
+  let entries = Object.values(data.habitEntries).filter((entry: any) => entry.userId === DEFAULT_USER_ID);
+  
+  if (habitId) {
+    entries = entries.filter((entry: any) => entry.habitId === habitId);
+  }
+  
+  entries.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  
+  if (limit) {
+    entries = entries.slice(0, parseInt(limit as string));
+  }
+  
+  res.json(entries);
+});
+
+router.post("/habit-entries", (req, res) => {
+  const data = loadData();
+  const entryId = randomUUID();
+  const entry = {
+    id: entryId,
+    ...req.body,
+    userId: DEFAULT_USER_ID,
+    date: req.body.date || new Date().toISOString()
+  };
+  
+  data.habitEntries[entryId] = entry;
+  saveData(data);
+  res.json(entry);
+});
+
+// Message routes
+router.get("/messages", (req, res) => {
+  const data = loadData();
+  const { limit } = req.query;
+  
+  let messages = Object.values(data.messages).filter((message: any) => message.userId === DEFAULT_USER_ID);
+  messages.sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  
+  if (limit) {
+    messages = messages.slice(-parseInt(limit as string));
+  }
+  
+  res.json(messages);
+});
+
+router.post("/messages", (req, res) => {
+  const data = loadData();
+  const { content } = req.body;
+  
+  // Create user message
+  const userMessageId = randomUUID();
+  const userMessage = {
+    id: userMessageId,
+    userId: DEFAULT_USER_ID,
+    content,
+    isFromUser: true,
+    habitEntryId: null,
+    timestamp: new Date().toISOString()
+  };
+  
+  data.messages[userMessageId] = userMessage;
+
+  // Parse habit from message
+  const habitInfo = parseHabitMessage(content);
+  let habitEntry = null;
+  let aiMessage = null;
+
+  if (habitInfo) {
+    // Find or create habit
+    const habits = Object.values(data.habits).filter((h: any) => h.userId === DEFAULT_USER_ID);
+    let habit = habits.find((h: any) => h.name === habitInfo.habitName);
+    
+    if (!habit) {
+      const habitId = randomUUID();
+      habit = {
+        id: habitId,
+        name: habitInfo.habitName,
+        category: habitInfo.category,
+        userId: DEFAULT_USER_ID,
+        pointsPerCompletion: habitInfo.category === 'coding' ? 20 : 
+                            habitInfo.category === 'fitness' ? 30 : 10,
+        visualizationType: 'calendar',
+        currentStreak: 0,
+        isActive: true,
+        createdAt: new Date().toISOString()
+      };
+      data.habits[habitId] = habit;
     }
-  });
 
-  // Get user habits
-  app.get("/api/habits", async (req, res) => {
-    try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      const habits = await storage.getHabits(user.id);
-      res.json(habits);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get habits" });
+    // Calculate points
+    const points = (habit as any).pointsPerCompletion * habitInfo.value;
+
+    // Create habit entry
+    const entryId = randomUUID();
+    habitEntry = {
+      id: entryId,
+      userId: DEFAULT_USER_ID,
+      habitId: (habit as any).id,
+      value: habitInfo.value,
+      points,
+      date: new Date().toISOString(),
+      metadata: { originalMessage: content }
+    };
+    
+    data.habitEntries[entryId] = habitEntry;
+
+    // Update user points
+    const user = data.users[DEFAULT_USER_ID];
+    if (user) {
+      user.totalPoints = (user.totalPoints || 0) + points;
+      user.currentStreak = (user.currentStreak || 0) + 1;
     }
+
+    // Generate AI response
+    const aiResponse = generateAIResponse(habitInfo.habitName, habitInfo.value, points);
+    const aiMessageId = randomUUID();
+    aiMessage = {
+      id: aiMessageId,
+      userId: DEFAULT_USER_ID,
+      content: aiResponse,
+      isFromUser: false,
+      habitEntryId: entryId,
+      timestamp: new Date().toISOString()
+    };
+    
+    data.messages[aiMessageId] = aiMessage;
+  } else {
+    // Generic AI response for unrecognized messages
+    const aiMessageId = randomUUID();
+    aiMessage = {
+      id: aiMessageId,
+      userId: DEFAULT_USER_ID,
+      content: "I didn't quite catch that habit. Try something like 'Did 3 coding questions today' or 'Went to gym for 1 hour'.",
+      isFromUser: false,
+      habitEntryId: null,
+      timestamp: new Date().toISOString()
+    };
+    
+    data.messages[aiMessageId] = aiMessage;
+  }
+
+  saveData(data);
+  
+  res.json({
+    userMessage,
+    aiMessage,
+    habitEntry
   });
+});
 
-  // Get habit entries
-  app.get("/api/habit-entries", async (req, res) => {
-    try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      const { habitId, limit, startDate, endDate } = req.query;
-      
-      let entries;
-      if (startDate && endDate) {
-        entries = await storage.getHabitEntriesByDateRange(
-          user.id,
-          new Date(startDate as string),
-          new Date(endDate as string)
-        );
-      } else {
-        entries = await storage.getHabitEntries(
-          user.id,
-          habitId as string,
-          limit ? parseInt(limit as string) : undefined
-        );
-      }
-      
-      res.json(entries);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get habit entries" });
-    }
-  });
+// Badge routes
+router.get("/badges", (req, res) => {
+  const data = loadData();
+  const badges = Object.values(data.badges);
+  res.json(badges);
+});
 
-  // Get messages
-  app.get("/api/messages", async (req, res) => {
-    try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      const messages = await storage.getMessages(user.id);
-      res.json(messages);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get messages" });
-    }
-  });
+router.get("/user-badges", (req, res) => {
+  const data = loadData();
+  const userBadges = Object.values(data.userBadges).filter((ub: any) => ub.userId === DEFAULT_USER_ID);
+  res.json(userBadges);
+});
 
-  // Send message and process habit
-  app.post("/api/messages", async (req, res) => {
-    try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+router.post("/user-badges", (req, res) => {
+  const data = loadData();
+  const userBadgeId = randomUUID();
+  const userBadge = {
+    id: userBadgeId,
+    ...req.body,
+    userId: DEFAULT_USER_ID,
+    earnedAt: new Date().toISOString()
+  };
+  
+  data.userBadges[userBadgeId] = userBadge;
+  saveData(data);
+  res.json(userBadge);
+});
 
-      const { content } = insertMessageSchema.parse(req.body);
-      
-      // Create user message
-      const userMessage = await storage.createMessage({
-        userId: user.id,
-        content,
-        isFromUser: true,
-        habitEntryId: null
-      });
-
-      // Parse habit from message
-      const habitInfo = parseHabitMessage(content);
-      let aiResponse = "I understand! Keep up the great work! 🎉";
-      let habitEntry = null;
-
-      if (habitInfo) {
-        // Find or create habit
-        const habits = await storage.getHabits(user.id);
-        let habit = habits.find(h => h.name.toLowerCase() === habitInfo.habit);
-        
-        if (!habit) {
-          habit = await storage.createHabit({
-            userId: user.id,
-            name: habitInfo.habit,
-            category: habitInfo.category,
-            description: `Track ${habitInfo.habit} progress`,
-            pointsPerCompletion: habitInfo.category === 'coding' ? 20 : 15,
-            visualizationType: habitInfo.category === 'coding' ? 'calendar' : 
-                             habitInfo.category === 'fitness' ? 'circle' : 'bar',
-            currentStreak: 0,
-            isActive: true
-          });
-        }
-
-        // Create habit entry
-        const points = habit.pointsPerCompletion * habitInfo.value;
-        habitEntry = await storage.createHabitEntry({
-          userId: user.id,
-          habitId: habit.id,
-          value: habitInfo.value,
-          points,
-          date: new Date(),
-          metadata: { originalMessage: content }
-        });
-
-        // Update habit streak
-        const newStreak = habit.currentStreak + 1;
-        await storage.updateHabit(habit.id, { currentStreak: newStreak });
-
-        // Update user points and streak
-        await storage.updateUser(user.id, {
-          totalPoints: user.totalPoints + points,
-          currentStreak: Math.max(user.currentStreak, newStreak)
-        });
-
-        aiResponse = generateAIResponse(habitInfo.habit, habitInfo.value, newStreak, points);
-      }
-
-      // Create AI response message
-      const aiMessage = await storage.createMessage({
-        userId: user.id,
-        content: aiResponse,
-        isFromUser: false,
-        habitEntryId: habitEntry?.id || null
-      });
-
-      res.json({ userMessage, aiMessage, habitEntry });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to process message" });
-    }
-  });
-
-  // Get user badges
-  app.get("/api/user-badges", async (req, res) => {
-    try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      const userBadges = await storage.getUserBadges(user.id);
-      const allBadges = await storage.getAllBadges();
-      
-      const badgesWithDetails = userBadges.map(ub => {
-        const badge = allBadges.find(b => b.id === ub.badgeId);
-        return { ...ub, badge };
-      });
-      
-      res.json(badgesWithDetails);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get user badges" });
-    }
-  });
-
-  // Update user settings
-  app.patch("/api/user/settings", async (req, res) => {
-    try {
-      const user = await storage.getUserByUsername("demo");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      const { settings } = req.body;
-      const currentSettings = typeof user.settings === 'object' && user.settings !== null ? user.settings as Record<string, any> : {};
-      const updatedUser = await storage.updateUser(user.id, {
-        settings: { ...currentSettings, ...settings }
-      });
-      
-      res.json(updatedUser);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to update settings" });
-    }
-  });
-
-  const httpServer = createServer(app);
-  return httpServer;
-}
+export { router as apiRouter };
