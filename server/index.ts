@@ -1,8 +1,17 @@
 import express from "express";
 import cors from "cors";
 import { createServer } from "http";
+import OpenAI from "openai";
 import { apiRouter } from "./routes";
 import { setupVite, serveStatic } from "./vite";
+
+// Initialize OpenAI client
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY 
+});
+
+// Make OpenAI available to routes
+export { openai };
 
 const app = express();
 const server = createServer(app);

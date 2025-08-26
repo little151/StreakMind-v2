@@ -4,48 +4,7 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(0 0% 3.9%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(0 0% 3.9%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(0 0% 3.9%);
-  --primary: hsl(214.3 100% 50%);
-  --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(210 40% 96%);
-  --secondary-foreground: hsl(222.2 84% 4.9%);
-  --muted: hsl(210 40% 96%);
-  --muted-foreground: hsl(215.4 16.3% 46.9%);
-  --accent: hsl(214.3 100% 50%);
-  --accent-foreground: hsl(0 0% 98%);
-  --accent-light: hsl(214.3 100% 70%);
-  --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(214.3 31.8% 91.4%);
-  --input: hsl(214.3 31.8% 91.4%);
-  --ring: hsl(214.3 100% 50%);
-  --chart-1: hsl(214.3 100% 50%);
-  --chart-2: hsl(173 58% 39%);
-  --chart-3: hsl(197 37% 24%);
-  --chart-4: hsl(43 74% 66%);
-  --chart-5: hsl(27 87% 67%);
-  --font-sans: Inter, system-ui, sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
-  --radius: 1rem;
-  --gray-50: hsl(210 40% 98%);
-  --gray-100: hsl(210 40% 96%);
-  --gray-200: hsl(214.3 31.8% 91.4%);
-  --gray-300: hsl(213 27% 84%);
-  --gray-400: hsl(215.4 16.3% 65.9%);
-  --gray-500: hsl(215.4 16.3% 46.9%);
-  --gray-600: hsl(215.4 16.3% 25.9%);
-  --gray-700: hsl(215.3 25% 26.7%);
-  --gray-800: hsl(217.2 32.6% 17.5%);
-  --gray-900: hsl(222.2 84% 4.9%);
-}
-
-.dark {
+  /* Dark theme by default - monochrome with blue accent */
   --background: hsl(0 0% 8%);
   --foreground: hsl(0 0% 95%);
   --card: hsl(0 0% 12%);
@@ -67,20 +26,38 @@
   --input: hsl(0 0% 20%);
   --ring: hsl(214.3 100% 50%);
   --chart-1: hsl(214.3 100% 50%);
-  --chart-2: hsl(0 0% 70%);
-  --chart-3: hsl(0 0% 50%);
-  --chart-4: hsl(0 0% 30%);
-  --chart-5: hsl(0 0% 15%);
-  --gray-50: hsl(0 0% 16%);
-  --gray-100: hsl(0 0% 16%);
-  --gray-200: hsl(0 0% 20%);
-  --gray-300: hsl(0 0% 30%);
-  --gray-400: hsl(0 0% 50%);
-  --gray-500: hsl(0 0% 60%);
-  --gray-600: hsl(0 0% 70%);
-  --gray-700: hsl(0 0% 80%);
-  --gray-800: hsl(0 0% 90%);
-  --gray-900: hsl(0 0% 95%);
+  --chart-2: hsl(173 58% 39%);
+  --chart-3: hsl(197 37% 24%);
+  --chart-4: hsl(43 74% 66%);
+  --chart-5: hsl(27 87% 67%);
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 1rem;
+}
+
+/* Light theme (accessible via toggle) */
+:root[data-theme="light"] {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(0 0% 3.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 3.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 3.9%);
+  --primary: hsl(214.3 100% 50%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(210 40% 96%);
+  --secondary-foreground: hsl(222.2 84% 4.9%);
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  --accent: hsl(214.3 100% 50%);
+  --accent-foreground: hsl(0 0% 98%);
+  --accent-light: hsl(214.3 100% 70%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(214.3 31.8% 91.4%);
+  --input: hsl(214.3 31.8% 91.4%);
+  --ring: hsl(214.3 100% 50%);
 }
 
 @layer base {
@@ -90,5 +67,40 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   }
+}
+
+/* Chat bubble styles */
+.msg {
+  display: flex;
+  margin: 8px 0;
+}
+
+.msg.user {
+  justify-content: flex-end;
+}
+
+.msg.bot {
+  justify-content: flex-start;
+}
+
+.bubble {
+  max-width: 72ch;
+  padding: 10px 14px;
+  border-radius: 16px;
+  word-wrap: break-word;
+}
+
+.msg.user .bubble {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-bottom-right-radius: 4px;
+}
+
+.msg.bot .bubble {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  border-bottom-left-radius: 4px;
+  opacity: 0.9;
 }
