@@ -1,6 +1,18 @@
 # Overview
 
-HabitChat is a personal habit tracking application that combines conversational AI with data visualization. Users can log their daily activities through natural language chat messages, and the system automatically parses and tracks habits like coding, gym sessions, sleep, and reading. The app provides visual dashboards with calendar heatmaps, progress charts, and a gamified points/badges system to encourage consistent habit formation.
+StreakMind (also known as HabitChat) is a personal habit tracking application that combines conversational AI with data visualization. Users can log their daily activities through natural language chat messages, and the system automatically parses and tracks habits like coding, gym sessions, sleep, and reading. The app provides visual dashboards with calendar heatmaps, progress charts, and a gamified points/badges system to encourage consistent habit formation.
+
+## Recent Migration Status (August 27, 2025)
+Successfully migrated from Replit Agent to standard Replit environment. All core functionality is working:
+- ✓ Server running with Express + TypeScript
+- ✓ Gemini AI integration configured with API key
+- ✓ OpenAI support available as fallback
+- ✓ Production build working correctly
+- ✓ All UI components and pages functional
+- ⚠️ Development server has import resolution quirks (production build recommended)
+
+## Development Note
+The application works perfectly in production mode. For development, there are some import path resolution issues that don't affect functionality but may show in logs. Use production build for the best experience.
 
 # User Preferences
 

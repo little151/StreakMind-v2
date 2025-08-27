@@ -12,10 +12,11 @@ import {
 } from "./data-helpers";
 
 /**
- * createApiRouter(genai)
- * - genai: instance of GoogleGenerativeAI
+ * createApiRouter(aiClient, aiType)
+ * - aiClient: instance of GoogleGenerativeAI or OpenAI
+ * - aiType: 'gemini' | 'openai' | null
  */
-export function createApiRouter(genai: any) {
+export function createApiRouter(aiClient: any, aiType: string | null) {
   const router = Router();
 
   // -------------------- Chat Endpoint --------------------
@@ -75,22 +76,33 @@ Never give medical, legal, or financial advice.`;
         ? `User logged: ${logEntry.activity} (${logEntry.amount} ${logEntry.unit}). Points awarded: ${pointsAwarded}. ${streakUpdated ? `Streak updated to ${data.streaks[logEntry.activity]}.` : "Streak unchanged."}`
         : message;
 
-      // ✅ Use Gemini API
+      // ✅ Use AI API (Gemini or OpenAI)
       try {
-        if (genai) {
+        if (aiClient && aiType === "gemini") {
           const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
-          const model = genai.getGenerativeModel({ model: modelName });
+          const model = aiClient.getGenerativeModel({ model: modelName });
 
           const prompt = `${systemPrompt}\n\n${userContext}`;
 
           const response = await model.generateContent(prompt);
 
           reply = response?.response?.text()?.trim() || "Logged! Keep it up.";
+        } else if (aiClient && aiType === "openai") {
+          const completion = await aiClient.chat.completions.create({
+            model: "gpt-4o-mini",
+            temperature: 0.7,
+            max_tokens: 120,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userContext }
+            ]
+          });
+          reply = completion.choices?.[0]?.message?.content?.trim() || "Logged! Keep it up.";
         } else {
           reply = "⚠️ I couldn't reach the brain right now, but your log is saved.";
         }
       } catch (err) {
-        console.error("Gemini API error:", err);
+        console.error("AI API error:", err);
         reply = logEntry
           ? `Great job! +${pointsAwarded} points. ${streakUpdated ? `${logEntry.activity} streak: ${data.streaks[logEntry.activity]} days!` : ""}`
           : "⚠️ I couldn't reach the brain right now, but your log is saved.";
