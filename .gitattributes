@@ -1,0 +1,40 @@
+# Enforce LF (Unix-style) line endings in all text files
+* text=auto eol=lf
+
+# Windows-specific files that need CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Mark binary files to avoid Git messing with them
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.mp4 binary
+*.mp3 binary
+*.zip binary
+*.gz binary
+*.exe binary
+
+# TypeScript / JavaScript
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+
+# Configs
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.xml text eol=lf
+*.md text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+
+# Node/Package files
+package.json text eol=lf
+package-lock.json text eol=lf

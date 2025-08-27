@@ -29,6 +29,26 @@
       "message": "Did 2 more coding questions",
       "timestamp": "2025-08-26T20:47:22.749Z",
       "points": 10
+    },
+    {
+      "id": "bb4c88cf-cf15-4928-a9fb-4b1b3317db87",
+      "activity": "coding",
+      "amount": 1,
+      "unit": "questions",
+      "date": "2025-08-26",
+      "message": "did 1 coding question today",
+      "timestamp": "2025-08-26T20:50:52.417Z",
+      "points": 5
+    },
+    {
+      "id": "be307a54-73c4-4341-978d-e400643f0bbb",
+      "activity": "gym",
+      "amount": 1,
+      "unit": "session",
+      "date": "2025-08-26",
+      "message": "went gym today",
+      "timestamp": "2025-08-26T20:51:40.865Z",
+      "points": 10
     }
   ],
   "scores": [
@@ -46,6 +66,16 @@
       "id": "0ea0a5f3-e5d3-4d64-9fc1-5c5afa8d4205",
       "points": 10,
       "timestamp": "2025-08-26T20:47:22.749Z"
+    },
+    {
+      "id": "bcce14a5-d5d7-4787-830e-602526c600cb",
+      "points": 5,
+      "timestamp": "2025-08-26T20:50:52.417Z"
+    },
+    {
+      "id": "95f9c473-0b27-4f69-9aa3-4ff746fd21a7",
+      "points": 10,
+      "timestamp": "2025-08-26T20:51:40.865Z"
     }
   ],
   "visualizations": {},
