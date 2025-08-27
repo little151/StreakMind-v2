@@ -1,0 +1,35 @@
+You are working on the StreakMind (HabitChat) app. 
+IMPORTANT: The app must use ONLY Google Gemini API. 
+⚠️ WARNING: I will provide you with a text file containing the original build chat log where there may be mentions of OpenAI integration. IGNORE ALL OpenAI mentions in that file. DO NOT re-add OpenAI under any circumstance. We must rely exclusively on Google Gemini API.
+
+Your tasks:
+
+1. Use the provided .txt file (original chat log) only as a reference to understand:
+   - How the project was initially compiled successfully.
+   - How the interactive preview was launched correctly.
+   - How missing dependencies and import path issues were handled.
+
+2. Core Requirements:
+   - Remove all traces of OpenAI (packages, env vars, routes, code, docs).
+   - Ensure the server and chat routes are fully working with Gemini only.
+   - The app should only require `GEMINI_API_KEY` from Replit Secrets.
+
+3. Frontend Fix:
+   - The current issue is that the web app cannot compile or load the preview.
+   - Carefully compare the current state with the successful build process in the original chat log.
+   - Resolve any Vite/TypeScript path alias or import resolution issues so that `npm run dev` works without errors.
+   - Verify that the interactive preview works just like it did in the first successful build.
+
+4. Backend Fix:
+   - Confirm that the server routes call ONLY Gemini API for chat.
+   - Simplify by removing any dual-AI fallback logic left over from the previous attempt.
+   - Ensure chat responses are generated only via Gemini.
+
+5. Deliverable:
+   - A fully working StreakMind app running in Replit with interactive preview.
+   - Chat works only with Gemini API.
+   - `npm run dev` (development mode) must work cleanly.
+   - Document the final run commands for dev and production.
+
+DO NOT integrate OpenAI even if the original chat log shows instructions for it.
+Your mission is to use the log only as a guide for fixing the build + preview issues, but the final app must be Gemini-only.

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Sun, Moon, BarChart3, MessageSquare, Trophy } from "lucide-react";
 import { Button } from "./components/ui/button";
 import NewChatInterface from "./components/new-chat-interface";
