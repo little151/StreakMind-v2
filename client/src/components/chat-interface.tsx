@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Send, Bot } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import type { Message } from "@shared/schema";
+import { apiRequest, queryClient } from "../lib/queryClient";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+// import type { Message } from "../../shared/schema";
 
 export default function ChatInterface() {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { data: messages = [], isLoading } = useQuery<Message[]>({
+  const { data: messages = [], isLoading } = useQuery<any[]>({
     queryKey: ['/api/messages'],
   });
 

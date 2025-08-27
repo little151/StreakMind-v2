@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Sun, Moon, BarChart3, MessageSquare, Trophy } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import NewChatInterface from "@/components/new-chat-interface";
-import NewDashboard from "@/components/new-dashboard";
-import NewScores from "@/components/new-scores";
+import { Button } from "./components/ui/button";
+import NewChatInterface from "./components/new-chat-interface";
+import NewDashboard from "./components/new-dashboard";
+import NewScores from "./components/new-scores";
 
 interface Stats {
   totalPoints: number;
@@ -23,6 +23,7 @@ interface Stats {
 type Tab = 'chat' | 'dashboard' | 'scores';
 
 export default function App() {
+  console.log('App component rendering...');
   const [activeTab, setActiveTab] = useState<Tab>('chat');
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,10 +87,12 @@ export default function App() {
     }
   };
 
+  console.log('App render - isLoading:', isLoading);
+  
   if (isLoading) {
     return (
-      <div className="h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Loading StreakMind...</div>
+      <div style={{ height: '100vh', backgroundColor: '#0a0a0a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
+        <div>Loading StreakMind...</div>
       </div>
     );
   }

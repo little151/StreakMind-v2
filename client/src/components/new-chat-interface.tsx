@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Send, Bot, User, Info } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 interface ChatMessage {
   id: string;
