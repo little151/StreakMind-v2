@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Sun, Moon, BarChart3, MessageSquare, Trophy } from "lucide-react";
+import { Sun, Moon, BarChart3, MessageSquare, Trophy, Settings } from "lucide-react";
 import { Button } from "./components/ui/button";
 import NewChatInterface from "./components/new-chat-interface";
 import NewDashboard from "./components/new-dashboard";
 import NewScores from "./components/new-scores";
+import SettingsModal from "./components/settings-modal";
 
 interface Stats {
   totalPoints: number;
@@ -29,6 +30,8 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [isMobile, setIsMobile] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showScores, setShowScores] = useState(true);
 
   // Initialize theme and mobile detection
   useEffect(() => {
@@ -40,6 +43,12 @@ export default function App() {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || 'dark';
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    // Load scores visibility setting
+    const savedShowScores = localStorage.getItem('showScores');
+    if (savedShowScores !== null) {
+      setShowScores(JSON.parse(savedShowScores));
+    }
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -72,6 +81,16 @@ export default function App() {
 
   const handleStatsUpdate = () => {
     fetchStats();
+  };
+
+  const handleToggleScores = (show: boolean) => {
+    setShowScores(show);
+    localStorage.setItem('showScores', JSON.stringify(show));
+    
+    // If hiding scores, switch to dashboard or chat if on scores tab
+    if (!show && activeTab === 'scores') {
+      setActiveTab('dashboard');
+    }
   };
 
   const renderTabContent = () => {
@@ -116,7 +135,7 @@ export default function App() {
               {[
                 { id: 'chat', icon: MessageSquare, label: 'Chat' },
                 { id: 'dashboard', icon: BarChart3, label: 'Dashboard' },
-                { id: 'scores', icon: Trophy, label: 'Scores' },
+                ...(showScores ? [{ id: 'scores', icon: Trophy, label: 'Scores' }] : []),
               ].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -139,8 +158,17 @@ export default function App() {
             </div>
           </nav>
 
-          {/* Theme Toggle */}
-          <div className="absolute bottom-6 left-6">
+          {/* Settings and Theme Toggle */}
+          <div className="absolute bottom-6 left-6 flex flex-col gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSettings(true)}
+              className="text-muted-foreground hover:text-foreground"
+              data-testid="button-open-settings"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -170,7 +198,7 @@ export default function App() {
             </div>
             
             <div className="flex items-center gap-4 sm:gap-8">
-              {stats && (
+              {stats && showScores && (
                 <>
                   <div className="text-center">
                     <div className="text-lg sm:text-2xl font-bold text-accent">
@@ -191,6 +219,19 @@ export default function App() {
                     <div className="text-[10px] sm:text-xs text-muted-foreground font-medium">Badges</div>
                   </div>
                 </>
+              )}
+              
+              {/* Settings Button for Mobile */}
+              {isMobile && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSettings(true)}
+                  className="text-muted-foreground hover:text-foreground"
+                  data-testid="button-open-settings-mobile"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
               )}
               
               {isMobile && (
@@ -219,7 +260,7 @@ export default function App() {
               {[
                 { id: 'chat', icon: '💬', label: 'Chat' },
                 { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-                { id: 'scores', icon: '🏆', label: 'Scores' },
+                ...(showScores ? [{ id: 'scores', icon: '🏆', label: 'Scores' }] : []),
               ].map((item) => (
                 <button
                   key={item.id}
@@ -237,6 +278,14 @@ export default function App() {
             </div>
           </div>
         )}
+        
+        {/* Settings Modal */}
+        <SettingsModal 
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          showScores={showScores}
+          onToggleScores={handleToggleScores}
+        />
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+import React from "react";
+
 interface Stats {
   totalPoints: number;
   streaks: Record<string, number>;
