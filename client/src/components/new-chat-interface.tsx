@@ -110,37 +110,86 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
     if (!showInfoModal) return null;
 
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" data-testid="modal-info">
+        <div className="bg-card border border-border rounded-lg p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Chat Commands</h3>
+            <h3 className="text-lg font-semibold text-foreground">How StreakMind Works</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowInfoModal(false)}
               className="text-muted-foreground hover:text-foreground"
+              data-testid="button-close-info"
             >
               ×
             </Button>
           </div>
-          <div className="space-y-3 text-sm text-muted-foreground">
+          
+          <div className="space-y-5 text-sm">
+            {/* Natural Chat Logging */}
             <div>
-              <strong className="text-foreground">Coding:</strong>
-              <div className="ml-2">• "Did 2 coding questions"</div>
-              <div className="ml-2">• "Coded for 30 minutes"</div>
+              <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                💬 Natural Chat Logging
+              </h4>
+              <p className="text-muted-foreground mb-2">Just chat naturally about your activities:</p>
+              <div className="space-y-1 text-muted-foreground ml-4">
+                <div>• "Did 2 coding questions"</div>
+                <div>• "Went to gym today"</div>
+                <div>• "Slept 7 hours"</div>
+                <div>• "Read 30 pages"</div>
+                <div>• "Meditated for 15 minutes"</div>
+              </div>
             </div>
+
+            {/* Dynamic Activity Creation */}
             <div>
-              <strong className="text-foreground">Fitness:</strong>
-              <div className="ml-2">• "Gym done"</div>
-              <div className="ml-2">• "Workout complete"</div>
+              <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                ⭐ Create New Habits
+              </h4>
+              <p className="text-muted-foreground mb-2">Add new activities to track:</p>
+              <div className="space-y-1 text-muted-foreground ml-4">
+                <div>• "I want to track guitar practice"</div>
+                <div>• "Start tracking water intake"</div>
+                <div>• "Add stretching to my habits"</div>
+              </div>
             </div>
+
+            {/* AI Personalities */}
             <div>
-              <strong className="text-foreground">Sleep:</strong>
-              <div className="ml-2">• "Slept 7 hours"</div>
+              <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                🎭 AI Personality Modes
+              </h4>
+              <p className="text-muted-foreground mb-2">I adapt my personality based on your needs:</p>
+              <div className="space-y-1 text-muted-foreground ml-4">
+                <div>• <strong className="text-blue-400">Therapist</strong> - Emotional support & understanding</div>
+                <div>• <strong className="text-green-400">Friend</strong> - Casual & encouraging</div>
+                <div>• <strong className="text-orange-400">Trainer</strong> - High-energy motivation</div>
+                <div>• <strong className="text-red-400">Father</strong> - Tough love & accountability</div>
+              </div>
             </div>
+
+            {/* Gamification Toggle */}
             <div>
-              <strong className="text-foreground">Time:</strong>
-              <div className="ml-2">• Add "yesterday" to log for previous day</div>
+              <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                🎮 Optional Gamification
+              </h4>
+              <p className="text-muted-foreground mb-2">Control your experience:</p>
+              <div className="space-y-1 text-muted-foreground ml-4">
+                <div>• Toggle scores ON/OFF in settings</div>
+                <div>• Focus mode hides points & badges</div>
+                <div>• Tile dashboard adapts to your preferences</div>
+              </div>
+            </div>
+
+            {/* Tips */}
+            <div className="pt-4 border-t border-border">
+              <h4 className="font-medium text-foreground mb-2">💡 Pro Tips</h4>
+              <div className="space-y-1 text-muted-foreground text-xs">
+                <div>• Use "yesterday" to log for previous day</div>
+                <div>• Activities auto-appear in your dashboard</div>
+                <div>• Streaks build with daily consistency</div>
+                <div>• Ask me anything - I'm here to help!</div>
+              </div>
             </div>
           </div>
         </div>
