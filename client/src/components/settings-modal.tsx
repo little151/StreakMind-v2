@@ -1,15 +1,39 @@
 import React, { useState } from "react";
-import { X, Settings, Eye, EyeOff } from "lucide-react";
-import { Button } from "./ui/button";
+import { X, Settings, Eye, EyeOff, Brain, Heart, Dumbbell, Users } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   showScores: boolean;
   onToggleScores: (show: boolean) => void;
+  enabledPersonalities?: {
+    therapist: boolean;
+    friend: boolean;
+    trainer: boolean;
+    father: boolean;
+  };
+  onUpdatePersonalities?: (personalities: {
+    therapist: boolean;
+    friend: boolean;
+    trainer: boolean;
+    father: boolean;
+  }) => void;
 }
 
-export default function SettingsModal({ isOpen, onClose, showScores, onToggleScores }: SettingsModalProps) {
+export default function SettingsModal({ 
+  isOpen, 
+  onClose, 
+  showScores, 
+  onToggleScores,
+  enabledPersonalities = {
+    therapist: true,
+    friend: true,
+    trainer: true,
+    father: true,
+  },
+  onUpdatePersonalities
+}: SettingsModalProps) {
+  const [localPersonalities, setLocalPersonalities] = useState(enabledPersonalities);
   if (!isOpen) return null;
 
   return (
@@ -22,15 +46,13 @@ export default function SettingsModal({ isOpen, onClose, showScores, onToggleSco
             </div>
             <h3 className="text-lg font-semibold text-foreground">Settings</h3>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground p-2 rounded"
             data-testid="button-close-settings"
           >
             <X className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
 
         <div className="space-y-6">
@@ -51,15 +73,59 @@ export default function SettingsModal({ isOpen, onClose, showScores, onToggleSco
                   : "Focus mode - only basic habit tracking without points"}
               </p>
             </div>
-            <Button
-              variant={showScores ? "default" : "outline"}
-              size="sm"
+            <button
               onClick={() => onToggleScores(!showScores)}
-              className={showScores ? "bg-accent hover:bg-accent/90" : ""}
+              className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+                showScores 
+                  ? "bg-accent text-accent-foreground hover:bg-accent/90" 
+                  : "border border-border text-foreground hover:bg-muted"
+              }`}
               data-testid="toggle-scores-visibility"
             >
               {showScores ? "ON" : "OFF"}
-            </Button>
+            </button>
+          </div>
+
+          {/* Personality Toggles */}
+          <div className="border-t border-border pt-6">
+            <h4 className="font-medium text-foreground mb-3">AI Personality Modes</h4>
+            <p className="text-sm text-muted-foreground mb-4">
+              Choose which personality modes your AI companion can use when responding
+            </p>
+            <div className="space-y-3">
+              {[
+                { key: 'therapist', label: 'Therapist', icon: Heart, description: 'Warm, empathetic support' },
+                { key: 'friend', label: 'Friend', icon: Users, description: 'Casual, friendly encouragement' },
+                { key: 'trainer', label: 'Trainer', icon: Dumbbell, description: 'High-energy motivation' },
+                { key: 'father', label: 'Father', icon: Brain, description: 'Firm, tough love approach' },
+              ].map(({ key, label, icon: Icon, description }) => (
+                <div key={key} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <Icon className="h-4 w-4 text-accent" />
+                    <div>
+                      <div className="font-medium text-sm">{label}</div>
+                      <div className="text-xs text-muted-foreground">{description}</div>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={localPersonalities[key as keyof typeof localPersonalities]}
+                      onChange={(e) => {
+                        const updated = {
+                          ...localPersonalities,
+                          [key]: e.target.checked
+                        };
+                        setLocalPersonalities(updated);
+                        onUpdatePersonalities?.(updated);
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent"></div>
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Help Section */}
@@ -68,16 +134,21 @@ export default function SettingsModal({ isOpen, onClose, showScores, onToggleSco
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>• <strong className="text-foreground">Log activities:</strong> Just chat naturally - "Did 30 min meditation" or "Went to gym"</p>
               <p>• <strong className="text-foreground">Create new habits:</strong> Say "I want to track reading" to add new activities</p>
-              <p>• <strong className="text-foreground">AI personality:</strong> I adapt as therapist, friend, trainer, or father based on your needs</p>
-              <p>• <strong className="text-foreground">Gamification:</strong> Toggle points and badges on/off to match your motivation style</p>
+              <p>• <strong className="text-foreground">CRUD commands:</strong> "Delete meditation", "Rename gym to workout", "Set reading points to 15"</p>
+              <p>• <strong className="text-foreground">AI personality:</strong> I adapt based on enabled personality modes</p>
+              <p>• <strong className="text-foreground">General chat:</strong> Ask me anything! I can help with non-tracking questions too</p>
             </div>
           </div>
         </div>
 
         <div className="mt-6 flex justify-end">
-          <Button onClick={onClose} data-testid="button-close-settings-footer">
+          <button 
+            onClick={onClose} 
+            className="px-4 py-2 bg-accent text-accent-foreground rounded hover:bg-accent/90 transition-colors"
+            data-testid="button-close-settings-footer"
+          >
             Done
-          </Button>
+          </button>
         </div>
       </div>
     </div>
