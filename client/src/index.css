@@ -68,6 +68,38 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  button, a, input, textarea, select {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Enhanced focus states */
+  button:focus, input:focus, textarea:focus {
+    outline: 2px solid hsl(var(--accent));
+    outline-offset: 2px;
+  }
+
+  /* Custom scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent));
   }
 }
 
@@ -90,17 +122,110 @@
   padding: 10px 14px;
   border-radius: 16px;
   word-wrap: break-word;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
 }
 
 .msg.user .bubble {
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 8px hsla(var(--primary), 0.3);
 }
 
 .msg.bot .bubble {
   background: hsl(var(--muted));
   color: hsl(var(--foreground));
   border-bottom-left-radius: 4px;
-  opacity: 0.9;
+  border: 1px solid hsl(var(--border));
+}
+
+.bubble:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px hsla(var(--foreground), 0.1);
+}
+
+/* Enhanced loading animation */
+@keyframes pulse-dot {
+  0%, 20% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+  80%, 100% { opacity: 0.3; transform: scale(0.8); }
+}
+
+.animate-bounce {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px hsla(var(--foreground), 0.1);
+  border-color: hsl(var(--accent) / 0.3);
+}
+
+/* Tile animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideInUp 0.4s ease-out;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  background: hsla(var(--background), 0.8);
+  transition: all 0.2s ease;
+}
+
+/* Progress animations */
+@keyframes progressFill {
+  from { width: 0%; }
+  to { width: var(--progress-width, 0%); }
+}
+
+.progress-animated {
+  animation: progressFill 1s ease-out;
+}
+
+/* Button enhancements */
+button {
+  position: relative;
+  overflow: hidden;
+}
+
+button:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: hsla(var(--accent-foreground), 0.1);
+  transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+button:active:before {
+  width: 300px;
+  height: 300px;
+}
+
+button > * {
+  position: relative;
+  z-index: 1;
 }
