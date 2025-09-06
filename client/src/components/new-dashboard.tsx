@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { TrendingUp } from "lucide-react";
+import ActivityTile from "./activity-tile";
 
 interface Stats {
   totalPoints: number;
@@ -28,211 +30,132 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
     );
   }
 
-  // Generate calendar heatmap data for coding
-  const generateCalendarData = () => {
-    const days = Array.from({ length: 35 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (34 - i));
-      
-      const codingLogs = stats.logs.filter(log => 
-        log.activity === 'coding' && 
-        new Date(log.date).toDateString() === date.toDateString()
-      );
-      
-      return {
-        date,
-        value: codingLogs.length,
-        intensity: Math.min(codingLogs.length / 3, 1)
-      };
-    });
-    
-    return days;
+  // Get unique activities and their data
+  const activities = Object.keys(stats.streaks);
+  
+  // Calculate points per activity
+  const getActivityPoints = (activity: string) => {
+    return stats.logs
+      .filter(log => log.activity === activity)
+      .reduce((total, log) => total + log.points, 0);
   };
 
-  // Generate gym progress
-  const generateGymProgress = () => {
-    const gymLogs = stats.logs.filter(log => log.activity === 'gym');
-    const progress = Math.min((gymLogs.length / 10) * 100, 100); // Target: 10 sessions
-    return progress;
+  // Determine visualization type for each activity
+  const getVisualizationType = (activity: string): 'calendar' | 'ring' | 'bar' => {
+    const activityLower = activity.toLowerCase();
+    if (activityLower.includes('coding') || activityLower.includes('code')) return 'calendar';
+    if (activityLower.includes('gym') || activityLower.includes('workout')) return 'ring';
+    return 'bar';
   };
-
-  // Generate sleep data
-  const generateSleepData = () => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days.map(day => ({
-      day,
-      hours: 6 + Math.random() * 3, // Mock data for visualization
-      percentage: (6 + Math.random() * 3) / 10 * 100
-    }));
-  };
-
-  const calendarData = generateCalendarData();
-  const gymProgress = generateGymProgress();
-  const sleepData = generateSleepData();
 
   return (
     <div className="h-full p-4 sm:p-6 overflow-y-auto bg-background">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         
-        {/* Coding Streak Calendar */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">Coding Streak</h3>
-            <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-              {stats.streaks.coding || 0} days current
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Your Habits</h2>
+            <p className="text-muted-foreground">Track your progress across all activities</p>
           </div>
-          
-          {/* Calendar Heatmap */}
-          <div className="grid grid-cols-7 gap-1">
-            {calendarData.map((day, i) => (
-              <div
-                key={i}
-                className={`w-4 h-4 rounded-sm ${
-                  day.value === 0 
-                    ? 'bg-muted' 
-                    : day.intensity < 0.3 
-                      ? 'bg-accent/30' 
-                      : day.intensity < 0.7 
-                        ? 'bg-accent/60' 
-                        : 'bg-accent'
-                }`}
-                title={`${day.date.toDateString()}: ${day.value} sessions`}
+          <div className="text-right">
+            <div className="text-2xl font-bold text-accent">{stats.totalPoints}</div>
+            <div className="text-sm text-muted-foreground">Total Points</div>
+          </div>
+        </div>
+
+        {/* Activity Tiles Grid */}
+        {activities.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+            {activities.map(activity => (
+              <ActivityTile
+                key={activity}
+                activity={activity}
+                streak={stats.streaks[activity] || 0}
+                recentLogs={stats.logs}
+                totalPoints={getActivityPoints(activity)}
+                visualization={getVisualizationType(activity)}
               />
             ))}
           </div>
-          
-          <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
-            <span>Less</span>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 bg-muted rounded-sm" />
-              <div className="w-3 h-3 bg-accent/30 rounded-sm" />
-              <div className="w-3 h-3 bg-accent/60 rounded-sm" />
-              <div className="w-3 h-3 bg-accent rounded-sm" />
+        ) : (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <TrendingUp className="h-8 w-8 text-muted-foreground" />
             </div>
-            <span>More</span>
+            <h3 className="text-lg font-medium text-foreground mb-2">No habits yet</h3>
+            <p className="text-muted-foreground mb-4">Start by chatting about your activities or creating new habits</p>
+          </div>
+        )}
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
+            <div className="text-2xl font-bold text-foreground">
+              {Object.values(stats.streaks).filter(s => s > 0).length}
+            </div>
+            <div className="text-sm text-muted-foreground">Active Streaks</div>
+          </div>
+          
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
+            <div className="text-2xl font-bold text-foreground">
+              {Math.max(...Object.values(stats.streaks), 0)}
+            </div>
+            <div className="text-sm text-muted-foreground">Best Streak</div>
+          </div>
+          
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
+            <div className="text-2xl font-bold text-foreground">
+              {stats.badges.length}
+            </div>
+            <div className="text-sm text-muted-foreground">Badges</div>
+          </div>
+          
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
+            <div className="text-2xl font-bold text-foreground">
+              {stats.logs.length}
+            </div>
+            <div className="text-sm text-muted-foreground">Total Logs</div>
           </div>
         </div>
 
-        {/* Gym Progress Ring */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">Gym Progress</h3>
-            <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-              {stats.streaks.gym || 0} days streak
-            </div>
-          </div>
-          
-          {/* Progress Ring */}
-          <div className="flex items-center justify-center">
-            <div className="relative w-32 h-32">
-              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  stroke="hsl(var(--muted))"
-                  strokeWidth="8"
-                  fill="none"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  stroke="hsl(var(--accent))"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={`${gymProgress * 2.51327} 251.327`}
-                  strokeLinecap="round"
-                  className="transition-all duration-500"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    {Math.round(gymProgress)}%
-                  </div>
-                  <div className="text-xs text-muted-foreground">Complete</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="text-center mt-4 text-sm text-muted-foreground">
-            Target: 10 sessions
-          </div>
-        </div>
-
-        {/* Sleep Bar Chart */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">Sleep Pattern</h3>
-            <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-              {stats.streaks.sleep || 0} days tracked
-            </div>
-          </div>
-          
-          {/* Bar Chart */}
-          <div className="space-y-3">
-            {sleepData.map((day, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="w-8 text-xs text-muted-foreground font-medium">
-                  {day.day}
-                </div>
-                <div className="flex-1 bg-muted rounded-full h-2 relative overflow-hidden">
-                  <div
-                    className="bg-accent h-full rounded-full transition-all duration-500"
-                    style={{ width: `${day.percentage}%` }}
-                  />
-                </div>
-                <div className="text-xs text-muted-foreground w-8 text-right">
-                  {day.hours.toFixed(1)}h
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="text-center mt-4 text-sm text-muted-foreground">
-            Target: 8 hours per night
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-6">Recent Activity</h3>
-          
-          <div className="space-y-3">
-            {stats.logs.slice(0, 5).map((log) => (
-              <div key={log.id} className="flex items-center justify-between py-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-accent rounded-full" />
-                  <div>
-                    <div className="text-sm font-medium text-foreground capitalize">
-                      {log.activity}
+        {/* Recent Activity Feed */}
+        {stats.logs.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h3>
+            <div className="bg-card rounded-xl border border-border p-4">
+              <div className="space-y-3 max-h-48 overflow-y-auto">
+                {stats.logs.slice(0, 10).map(log => (
+                  <div key={log.id} className="flex items-center justify-between py-2 border-b border-border/50 last:border-b-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center">
+                        <span className="text-sm">
+                          {log.activity === 'coding' ? '💻' : 
+                           log.activity === 'gym' ? '💪' : 
+                           log.activity === 'sleep' ? '😴' : 
+                           log.activity === 'reading' ? '📚' : 
+                           log.activity === 'meditation' ? '🧘' : '⭐'}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-foreground capitalize">
+                          {log.activity}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {log.amount} {log.unit} • {new Date(log.date).toLocaleDateString()}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {log.amount} {log.unit}
+                    <div className="text-accent font-medium">
+                      +{log.points} pts
                     </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-accent">
-                    +{log.points}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(log.timestamp).toLocaleDateString()}
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-          
-          {stats.logs.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No activity yet. Start logging your habits!
             </div>
-          )}
-        </div>
+          </div>
+        )}
+        
       </div>
     </div>
   );
