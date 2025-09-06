@@ -15,11 +15,30 @@ export interface LogEntry {
   points: number;
 }
 
+export interface Activity {
+  id: string;
+  name: string;
+  customPoints?: number; // User can override default points
+  createdAt: string;
+  description?: string;
+  visualizationType: 'calendar' | 'ring' | 'bar';
+}
+
 export interface AppData {
   logs: LogEntry[];
   scores: Array<{ id: string; points: number; timestamp: string }>;
   visualizations: Record<string, any>;
   streaks: Record<string, number>;
+  activities: Record<string, Activity>; // New: store activity metadata
+  settings: {
+    showScores: boolean;
+    enabledPersonalities: {
+      therapist: boolean;
+      friend: boolean;
+      trainer: boolean;
+      father: boolean;
+    };
+  };
 }
 
 // Helper functions for data management
@@ -30,14 +49,34 @@ export function loadData(): AppData {
       logs: data.logs || [],
       scores: data.scores || [],
       visualizations: data.visualizations || {},
-      streaks: data.streaks || {}
+      streaks: data.streaks || {},
+      activities: data.activities || {},
+      settings: data.settings || {
+        showScores: true,
+        enabledPersonalities: {
+          therapist: true,
+          friend: true,
+          trainer: true,
+          father: true,
+        }
+      }
     };
   } catch {
     return { 
       logs: [], 
       scores: [], 
       visualizations: {}, 
-      streaks: {} 
+      streaks: {},
+      activities: {},
+      settings: {
+        showScores: true,
+        enabledPersonalities: {
+          therapist: true,
+          friend: true,
+          trainer: true,
+          father: true,
+        }
+      }
     };
   }
 }
@@ -155,8 +194,15 @@ export function parseLogIntent(message: string, existingActivities?: string[]): 
   return null;
 }
 
-// Calculate points for activities - enhanced for dynamic activities
-export function calculatePoints(activity: string, amount: number, unit: string): number {
+// Calculate points for activities - enhanced with custom points support
+export function calculatePoints(activity: string, amount: number, unit: string, data: AppData): number {
+  // Check if user has set custom points for this activity
+  const activityData = data.activities[activity];
+  if (activityData && activityData.customPoints !== undefined) {
+    return activityData.customPoints * amount;
+  }
+
+  // Use default point calculation
   switch (activity) {
     case 'coding':
       if (unit === 'questions') return amount * 5; // 5 points per question
@@ -205,4 +251,111 @@ export function calculateBadges(streaks: Record<string, number>): Array<{ name: 
   });
   
   return badges;
+}
+
+// Activity CRUD operations
+export function createActivity(data: AppData, name: string, customPoints?: number): Activity {
+  const activity: Activity = {
+    id: randomUUID(),
+    name,
+    customPoints,
+    createdAt: new Date().toISOString(),
+    visualizationType: getVisualizationType(name)
+  };
+  
+  data.activities[name] = activity;
+  if (!data.streaks[name]) {
+    data.streaks[name] = 0;
+  }
+  
+  return activity;
+}
+
+export function updateActivity(data: AppData, oldName: string, updates: Partial<Activity>): boolean {
+  const activity = data.activities[oldName];
+  if (!activity) return false;
+  
+  // If renaming, update the key
+  if (updates.name && updates.name !== oldName) {
+    delete data.activities[oldName];
+    data.activities[updates.name] = { ...activity, ...updates };
+    
+    // Update streaks key
+    data.streaks[updates.name] = data.streaks[oldName] || 0;
+    delete data.streaks[oldName];
+    
+    // Update logs
+    data.logs.forEach(log => {
+      if (log.activity === oldName) {
+        log.activity = updates.name!;
+      }
+    });
+  } else {
+    data.activities[oldName] = { ...activity, ...updates };
+  }
+  
+  return true;
+}
+
+export function deleteActivity(data: AppData, name: string): boolean {
+  if (!data.activities[name]) return false;
+  
+  delete data.activities[name];
+  delete data.streaks[name];
+  
+  // Remove logs for this activity
+  data.logs = data.logs.filter(log => log.activity !== name);
+  
+  return true;
+}
+
+function getVisualizationType(activity: string): 'calendar' | 'ring' | 'bar' {
+  const activityLower = activity.toLowerCase();
+  if (activityLower.includes('coding') || activityLower.includes('code')) return 'calendar';
+  if (activityLower.includes('gym') || activityLower.includes('workout')) return 'ring';
+  return 'bar';
+}
+
+// Enhanced chat command parsing for CRUD operations
+export function parseCRUDCommand(message: string): {
+  action: 'create' | 'update' | 'delete' | 'setpoints' | null;
+  activity?: string;
+  newName?: string;
+  points?: number;
+} {
+  const text = message.toLowerCase().trim();
+  
+  // Delete commands
+  if (text.includes('delete') || text.includes('remove')) {
+    const deleteMatch = text.match(/(?:delete|remove)\s+(.+?)(?:\s+activity|\s+habit|$)/);
+    if (deleteMatch) {
+      return { action: 'delete', activity: deleteMatch[1].trim() };
+    }
+  }
+  
+  // Rename commands
+  if (text.includes('rename') || text.includes('change name')) {
+    const renameMatch = text.match(/(?:rename|change name of)\s+(.+?)\s+to\s+(.+)/);
+    if (renameMatch) {
+      return {
+        action: 'update',
+        activity: renameMatch[1].trim(),
+        newName: renameMatch[2].trim()
+      };
+    }
+  }
+  
+  // Set points commands
+  if (text.includes('set points') || text.includes('points to')) {
+    const pointsMatch = text.match(/set\s+(.+?)\s+(?:points\s+)?to\s+(\d+)/);
+    if (pointsMatch) {
+      return {
+        action: 'setpoints',
+        activity: pointsMatch[1].replace(/points|point/, '').trim(),
+        points: parseInt(pointsMatch[2])
+      };
+    }
+  }
+  
+  return { action: null };
 }

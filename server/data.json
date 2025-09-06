@@ -99,6 +99,26 @@
       "message": "Did 2 coding questions",
       "timestamp": "2025-08-27T22:02:49.506Z",
       "points": 10
+    },
+    {
+      "id": "19cf24c3-0cad-4a4a-86fd-013dec21e721",
+      "activity": "gaming",
+      "amount": 30,
+      "unit": "minutes",
+      "date": "2025-09-06",
+      "message": "did 30 min of gaming",
+      "timestamp": "2025-09-06T22:55:14.521Z",
+      "points": 3
+    },
+    {
+      "id": "6faf2e6f-fcbc-4562-8dfe-cfab4568c351",
+      "activity": "gamin",
+      "amount": 1,
+      "unit": "minutes",
+      "date": "2025-09-06",
+      "message": "i want to delete Gamin",
+      "timestamp": "2025-09-06T22:56:00.919Z",
+      "points": 0
     }
   ],
   "scores": [
@@ -151,11 +171,23 @@
       "id": "48c0a1bc-99f7-4877-b63c-01aefe93e781",
       "points": 10,
       "timestamp": "2025-08-27T22:02:49.506Z"
+    },
+    {
+      "id": "fcb5cfe9-0075-4ef5-b073-2661e629f602",
+      "points": 3,
+      "timestamp": "2025-09-06T22:55:14.521Z"
+    },
+    {
+      "id": "7bb605db-2c76-4bdf-b6ab-45a6bef39597",
+      "points": 0,
+      "timestamp": "2025-09-06T22:56:00.919Z"
     }
   ],
   "visualizations": {},
   "streaks": {
     "coding": 2,
-    "gym": 2
+    "gym": 2,
+    "gaming": 1,
+    "gamin": 1
   }
 }

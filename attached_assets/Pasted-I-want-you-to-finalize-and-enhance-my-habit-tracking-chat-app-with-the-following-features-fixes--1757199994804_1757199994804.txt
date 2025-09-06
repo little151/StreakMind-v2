@@ -1,0 +1,99 @@
+I want you to finalize and enhance my habit-tracking + chat app with the following features, fixes, and upgrades. This is the final shot, so please integrate everything cleanly.
+
+🔹 Core Vision
+
+This app is a chat-first streak tracker + personal AI companion, powered by the Google Gemini API.
+It should feel like a therapist, friend, trainer, or father (tough love) depending on the context — but users must also have the option to toggle personalities.
+
+The app must allow both chat-based interactions and manual dashboard management.
+
+🔹 Features & Functionality
+1. Conversational Brain (Gemini API)
+
+All chat powered by Google Gemini API.
+
+If the user asks something unrelated to tracking (e.g., generic question), Gemini should respond like a normal AI assistant, unfiltered.
+
+If the user mentions logs or streaks, app auto-detects and records progress in the background.
+
+2. Activity Management
+
+Dynamic creation via chat (e.g., “I want to track reading books” → new activity created).
+
+Manual dashboard option: users can also add new activities via a plus (+) button on the dashboard.
+
+CRUD operations (chat or manual):
+
+Create → new activity
+
+Read → view activity details
+
+Update → rename activity, change point values
+
+Delete → remove activity
+
+3. Personality System
+
+Default: AI behaves as therapist/friend/trainer/father (adaptive).
+
+Toggle ON/OFF specific personalities in settings.
+
+Example: If user disables "father," app won’t use that personality.
+
+4. Scoring System
+
+Each activity gets default points from the app (e.g., 10 per log).
+
+User option to override → set custom points per activity.
+
+Scores & streaks update automatically when activities are logged.
+
+Scoreboard visibility toggle:
+
+ON → shows tile-based dashboard
+
+OFF → completely hidden/inaccessible
+
+5. Dashboard & UI
+
+Tile-based redesign:
+
+Each activity displayed as a tile showing streak, points, and progress.
+
+Tiles should support quick edit (update points, rename, delete).
+
+Manual Add/Delete buttons for activities (in addition to chat).
+
+Dark theme default, light theme optional.
+
+6. Info (“i”) Button Update
+
+The info modal should now explain:
+
+How to log activities in chat.
+
+How to manually add/delete activities.
+
+How CRUD works through chat commands.
+
+How to toggle personalities.
+
+How to set custom points.
+
+How to toggle the score dashboard ON/OFF.
+
+That the AI also works as a general-purpose chatbot for anything outside tracking.
+
+🔹 Summary of New Updates
+
+Manual activity add/delete alongside chat-based creation.
+
+Full CRUD support via chat & dashboard.
+
+Toggle specific personalities (e.g., remove “father” role).
+
+Custom user-defined point values per activity.
+
+Scoreboard tile redesign (with quick-edit options).
+
+Gemini API fallback for generic questions (acts like normal AI).

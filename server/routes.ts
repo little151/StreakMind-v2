@@ -8,7 +8,13 @@ import {
   calculatePoints,
   shouldIncrementStreak,
   calculateBadges,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+  parseCRUDCommand,
   type LogEntry,
+  type Activity,
+  type AppData,
 } from "./data-helpers";
 
 // Enhanced personality system functions
@@ -48,12 +54,28 @@ function detectPersonalityNeeded(message: string): 'therapist' | 'friend' | 'tra
 
 function buildEnhancedPrompt(
   mode: string, 
-  data: any, 
+  data: AppData, 
   logEntry: any, 
   pointsAwarded: number, 
-  streakUpdated: boolean
+  streakUpdated: boolean,
+  isGeneralQuery: boolean = false
 ): string {
+  // For general queries unrelated to habit tracking, behave as a normal AI assistant
+  if (isGeneralQuery) {
+    return `You are a helpful AI assistant powered by Gemini. Answer the user's question naturally and helpfully. You can discuss any topic, provide information, help with tasks, or have casual conversation. Be knowledgeable, friendly, and engaging.`;
+  }
+
   const baseContext = `Current user stats: ${Object.keys(data.streaks).length} active habits, highest streak: ${Math.max(...Object.values(data.streaks) as number[], 0)} days.`;
+  
+  // Filter enabled personalities
+  const enabledPersonalities = Object.entries(data.settings.enabledPersonalities)
+    .filter(([_, enabled]) => enabled)
+    .map(([personality, _]) => personality);
+  
+  // If the detected mode is disabled, fall back to default
+  if (!enabledPersonalities.includes(mode)) {
+    mode = 'default';
+  }
   
   const modePrompts = {
     therapist: `You are StreakMind in therapist mode: warm, empathetic, understanding, and supportive. Provide emotional support and gentle encouragement. Ask thoughtful questions about their feelings and offer comfort. Keep responses caring but concise (2-3 sentences max). ${baseContext}`,
@@ -70,7 +92,7 @@ function buildEnhancedPrompt(
   return modePrompts[mode as keyof typeof modePrompts] || modePrompts.default;
 }
 
-function handleDynamicActivityCreation(message: string, data: any): string | null {
+function handleDynamicActivityCreation(message: string, data: AppData): string | null {
   const text = message.toLowerCase();
   
   // Pattern: "I want to track [activity]" or "Add [activity] to my habits" or "Start tracking [activity]"
@@ -88,9 +110,9 @@ function handleDynamicActivityCreation(message: string, data: any): string | nul
         .trim();
       
       if (activityName && activityName.length > 0 && activityName.length < 50) {
-        // Initialize the new activity in streaks
-        if (!data.streaks[activityName]) {
-          data.streaks[activityName] = 0;
+        // Use the new createActivity function
+        if (!data.activities[activityName] && !data.streaks[activityName]) {
+          createActivity(data, activityName);
           return activityName;
         }
       }
@@ -98,6 +120,32 @@ function handleDynamicActivityCreation(message: string, data: any): string | nul
   }
   
   return null;
+}
+
+// Check if message is a general query (not habit-related)
+function isGeneralQuery(message: string): boolean {
+  const habitKeywords = ['track', 'log', 'streak', 'habit', 'points', 'score', 'gym', 'coding', 'sleep', 'meditation', 'reading', 'exercise', 'workout', 'did', 'completed', 'finished', 'yesterday', 'today'];
+  const text = message.toLowerCase();
+  
+  // If message contains habit-related keywords, it's not a general query
+  for (const keyword of habitKeywords) {
+    if (text.includes(keyword)) {
+      return false;
+    }
+  }
+  
+  // Check for CRUD commands
+  const crudCommand = parseCRUDCommand(message);
+  if (crudCommand.action) {
+    return false;
+  }
+  
+  // Check for activity creation patterns
+  if (handleDynamicActivityCreation(message, { activities: {}, streaks: {} } as AppData)) {
+    return false;
+  }
+  
+  return true;
 }
 
 /**
@@ -123,7 +171,7 @@ export function createApiRouter(genai: any) {
         saveData(data);
         // Generate response for new activity creation
         const personalityMode = detectPersonalityNeeded(message);
-        const systemPrompt = buildEnhancedPrompt(personalityMode, data, null, 0, false);
+        const systemPrompt = buildEnhancedPrompt(personalityMode, data, null, 0, false, false);
         
         let activityReply = "";
         try {
@@ -152,7 +200,7 @@ export function createApiRouter(genai: any) {
       if (logIntent) {
         const { activity, amount, unit, date } = logIntent;
 
-        pointsAwarded = calculatePoints(activity, amount, unit);
+        pointsAwarded = calculatePoints(activity, amount, unit, data);
 
         if (shouldIncrementStreak(data, activity, date)) {
           data.streaks[activity] = (data.streaks[activity] || 0) + 1;
@@ -180,9 +228,49 @@ export function createApiRouter(genai: any) {
         saveData(data);
       }
 
-      // ✅ Build enhanced personality system
-      const personalityMode = detectPersonalityNeeded(message);
-      const systemPrompt = buildEnhancedPrompt(personalityMode, data, logEntry, pointsAwarded, streakUpdated);
+      // Check if this is a general query or habit-related
+      const isGeneral = isGeneralQuery(message);
+      const personalityMode = isGeneral ? 'default' : detectPersonalityNeeded(message);
+      const systemPrompt = buildEnhancedPrompt(personalityMode, data, logEntry, pointsAwarded, streakUpdated, isGeneral);
+      
+      // Handle CRUD commands
+      const crudCommand = parseCRUDCommand(message);
+      if (crudCommand.action && !isGeneral) {
+        let crudResult = '';
+        
+        switch (crudCommand.action) {
+          case 'delete':
+            if (crudCommand.activity && deleteActivity(data, crudCommand.activity)) {
+              crudResult = `Deleted "${crudCommand.activity}" from your habits.`;
+              saveData(data);
+            } else {
+              crudResult = `Couldn't find "${crudCommand.activity}" to delete.`;
+            }
+            break;
+            
+          case 'update':
+            if (crudCommand.activity && crudCommand.newName && updateActivity(data, crudCommand.activity, { name: crudCommand.newName })) {
+              crudResult = `Renamed "${crudCommand.activity}" to "${crudCommand.newName}".`;
+              saveData(data);
+            } else {
+              crudResult = `Couldn't rename "${crudCommand.activity}".`;
+            }
+            break;
+            
+          case 'setpoints':
+            if (crudCommand.activity && crudCommand.points !== undefined && updateActivity(data, crudCommand.activity, { customPoints: crudCommand.points })) {
+              crudResult = `Set "${crudCommand.activity}" to ${crudCommand.points} points per session.`;
+              saveData(data);
+            } else {
+              crudResult = `Couldn't set points for "${crudCommand.activity}".`;
+            }
+            break;
+        }
+        
+        if (crudResult) {
+          return res.json({ reply: crudResult, crudAction: crudCommand.action });
+        }
+      }
 
       const userContext = logEntry
         ? `User logged: ${logEntry.activity} (${logEntry.amount} ${logEntry.unit}). Points awarded: ${pointsAwarded}. ${streakUpdated ? `Streak updated to ${data.streaks[logEntry.activity]}.` : "Streak unchanged."}`
@@ -235,9 +323,102 @@ export function createApiRouter(genai: any) {
         streaks: data.streaks,
         badges,
         logs,
+        activities: data.activities,
+        settings: data.settings,
       });
     } catch (error) {
       console.error("Stats endpoint error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // -------------------- Activities CRUD Endpoints --------------------
+  router.post("/activities", (req, res) => {
+    try {
+      const { name, customPoints, visualizationType } = req.body;
+      
+      if (!name || typeof name !== "string") {
+        return res.status(400).json({ error: "Activity name is required" });
+      }
+
+      const data = loadData();
+      
+      if (data.activities[name]) {
+        return res.status(400).json({ error: "Activity already exists" });
+      }
+
+      const activity = createActivity(data, name, customPoints);
+      if (visualizationType) {
+        activity.visualizationType = visualizationType;
+      }
+      
+      saveData(data);
+      res.json({ activity, message: `Created activity "${name}"` });
+    } catch (error) {
+      console.error("Create activity error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  router.put("/activities/:name", (req, res) => {
+    try {
+      const { name } = req.params;
+      const updates = req.body;
+      
+      const data = loadData();
+      
+      if (updateActivity(data, name, updates)) {
+        saveData(data);
+        res.json({ message: "Activity updated successfully" });
+      } else {
+        res.status(404).json({ error: "Activity not found" });
+      }
+    } catch (error) {
+      console.error("Update activity error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  router.delete("/activities/:name", (req, res) => {
+    try {
+      const { name } = req.params;
+      
+      const data = loadData();
+      
+      if (deleteActivity(data, name)) {
+        saveData(data);
+        res.json({ message: `Deleted activity "${name}"` });
+      } else {
+        res.status(404).json({ error: "Activity not found" });
+      }
+    } catch (error) {
+      console.error("Delete activity error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // -------------------- Settings Endpoint --------------------
+  router.put("/settings", (req, res) => {
+    try {
+      const { showScores, enabledPersonalities } = req.body;
+      
+      const data = loadData();
+      
+      if (showScores !== undefined) {
+        data.settings.showScores = showScores;
+      }
+      
+      if (enabledPersonalities) {
+        data.settings.enabledPersonalities = {
+          ...data.settings.enabledPersonalities,
+          ...enabledPersonalities
+        };
+      }
+      
+      saveData(data);
+      res.json({ message: "Settings updated successfully", settings: data.settings });
+    } catch (error) {
+      console.error("Update settings error:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });
