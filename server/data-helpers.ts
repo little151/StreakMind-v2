@@ -46,8 +46,8 @@ export function saveData(data: AppData) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-// Parse natural language habit messages
-export function parseLogIntent(message: string): { 
+// Parse natural language habit messages - enhanced for dynamic activities
+export function parseLogIntent(message: string, existingActivities?: string[]): { 
   activity: string; 
   amount: number; 
   unit: string; 
@@ -64,6 +64,33 @@ export function parseLogIntent(message: string): {
   }
 
   const dateStr = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD
+
+  // Check for dynamic activities first (if we have a list of existing activities)
+  if (existingActivities && existingActivities.length > 0) {
+    for (const activity of existingActivities) {
+      const activityLower = activity.toLowerCase();
+      
+      // Check if message mentions this activity
+      if (text.includes(activityLower) || 
+          text.includes(`did ${activityLower}`) || 
+          text.includes(`completed ${activityLower}`) ||
+          text.includes(`finished ${activityLower}`)) {
+        
+        // Look for numbers in the message
+        const numberMatch = text.match(/(\d+(?:\.\d+)?)/);
+        const amount = numberMatch ? parseFloat(numberMatch[1]) : 1;
+        
+        // Determine unit based on context
+        let unit = 'session';
+        if (text.includes('minute') || text.includes('min')) unit = 'minutes';
+        else if (text.includes('hour') || text.includes('hr')) unit = 'hours';
+        else if (text.includes('page') || text.includes('chapter')) unit = 'pages';
+        else if (text.includes('mile') || text.includes('km') || text.includes('step')) unit = 'distance';
+        
+        return { activity, amount, unit, date: dateStr };
+      }
+    }
+  }
 
   // Coding patterns
   if (text.includes('coding') || text.includes('dsa') || text.includes('code') || 
@@ -101,10 +128,34 @@ export function parseLogIntent(message: string): {
     };
   }
 
+  // Reading patterns
+  if (text.includes('read') || text.includes('reading')) {
+    const pageMatch = text.match(/(\d+)\s*(?:pages?|chapters?)/);
+    const minuteMatch = text.match(/(?:read|reading)\s*(?:for\s*)?(\d+)\s*(?:minutes?|mins?)/);
+    
+    if (pageMatch) {
+      return { activity: 'reading', amount: parseInt(pageMatch[1]), unit: 'pages', date: dateStr };
+    } else if (minuteMatch) {
+      return { activity: 'reading', amount: parseInt(minuteMatch[1]), unit: 'minutes', date: dateStr };
+    }
+    return { activity: 'reading', amount: 1, unit: 'session', date: dateStr };
+  }
+
+  // Meditation patterns
+  if (text.includes('meditat') || text.includes('mindful')) {
+    const match = text.match(/(?:meditat|mindful)\w*\s*(?:for\s*)?(\d+)\s*(?:minutes?|mins?)/);
+    return { 
+      activity: 'meditation', 
+      amount: match ? parseInt(match[1]) : 10, 
+      unit: 'minutes', 
+      date: dateStr 
+    };
+  }
+
   return null;
 }
 
-// Calculate points for activities
+// Calculate points for activities - enhanced for dynamic activities
 export function calculatePoints(activity: string, amount: number, unit: string): number {
   switch (activity) {
     case 'coding':
@@ -115,8 +166,19 @@ export function calculatePoints(activity: string, amount: number, unit: string):
       return 10; // 10 points per gym session
     case 'sleep':
       return amount; // 1 point per hour of sleep
+    case 'reading':
+      if (unit === 'pages') return amount * 2; // 2 points per page
+      if (unit === 'minutes') return Math.floor(amount / 10); // 1 point per 10 minutes
+      return 8; // Default reading session
+    case 'meditation':
+      if (unit === 'minutes') return amount; // 1 point per minute
+      return 10; // Default meditation session
     default:
-      return 5; // Default points
+      // For dynamic activities, use general scoring
+      if (unit === 'minutes') return Math.floor(amount / 10); // 1 point per 10 minutes
+      if (unit === 'hours') return amount * 10; // 10 points per hour
+      if (unit === 'pages') return amount * 2; // 2 points per page
+      return 5; // Default session points
   }
 }
 

@@ -1,0 +1,100 @@
+I want you to upgrade and redesign my habit-tracking + chat app with the following updates and requirements.
+
+🔹 Core Vision
+
+This app is a chat-based streak tracker and companion, powered by Google Gemini API for conversations.
+It should feel like a therapist, friend, trainer, and father (tough love) all in one — the tone adapts depending on context.
+
+Users interact only via chat:
+
+Free conversations are powered by Gemini.
+
+When a user mentions an activity log (e.g., “I went to gym today”), the system automatically records it.
+
+The app should support dynamic activity creation through chat (e.g., “I want to track book reading” → adds a new tracker in dashboard).
+
+🔹 Features & Functionality
+
+Gemini API Chat Brain
+
+Chat should feel natural, human-like, and adaptive.
+
+Gemini is the main conversational layer.
+
+Streak tracking & activity logging run in the background.
+
+Activity Logging
+
+Each activity can be logged once per day for streak increment.
+
+Multiple logs per day allowed (different activities).
+
+Streaks only increment once per day per activity.
+
+Dynamic Activity Creation
+
+User can add new activities directly from chat.
+
+Newly created activity should immediately appear on dashboard & scoring system.
+
+Gamified Scores (Optional)
+
+Users can toggle ON/OFF score visibility in settings.
+
+When OFF → score dashboard is hidden/inaccessible.
+
+When ON → users see detailed scores.
+
+Scoring system includes streak counts, activity points, and badges.
+
+Tile-Based Dashboard UI
+
+Replace the old score dashboard with modern tile-based design.
+
+Each activity has its own tile showing:
+
+Current streak
+
+Progress (bar/ring/heatmap depending on activity type)
+
+Points earned
+
+Tiles should be responsive and minimalistic.
+
+Info (“i”) Button Update
+
+Info modal should now explain:
+
+How to log activities by just chatting.
+
+How to create a new activity (“I want to track XYZ”).
+
+How to toggle scores ON/OFF.
+
+That the AI can act as therapist/friend/trainer/father.
+
+🔹 UI/UX Requirements
+
+Minimal monochrome aesthetic with accent colors.
+
+Chat bubbles: User → right side, AI → left side.
+
+Smooth transitions between chat and dashboard updates.
+
+Tile-based layout for score dashboard.
+
+Dark theme default, light theme option available.
+
+🔹 Summary of Updates from Previous Version
+
+Gemini chat → not restricted to predefined logs.
+
+Dynamic activity creation via chat.
+
+Optional gamification (toggle ON/OFF).
+
+Tile-based redesign for score dashboard.
+
+Info modal updated with new usage instructions.
+
+Personality layer (therapist, friend, trainer, father).
