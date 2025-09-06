@@ -1,5 +1,5 @@
-import React from "react";
-import { Trophy, Zap, Calendar, TrendingUp } from "lucide-react";
+import React, { useState } from "react";
+import { Trophy, Zap, Calendar, TrendingUp, Edit, Trash2 } from "lucide-react";
 
 interface ActivityTileProps {
   activity: string;
@@ -15,6 +15,9 @@ interface ActivityTileProps {
   }>;
   totalPoints: number;
   visualization: 'calendar' | 'ring' | 'bar';
+  customPoints?: number;
+  onEdit?: (activity: string) => void;
+  onDelete?: (activity: string) => void;
 }
 
 export default function ActivityTile({ 
@@ -22,8 +25,12 @@ export default function ActivityTile({
   streak, 
   recentLogs, 
   totalPoints,
-  visualization 
+  visualization,
+  customPoints,
+  onEdit,
+  onDelete
 }: ActivityTileProps) {
+  const [showActions, setShowActions] = useState(false);
   const activityLogs = recentLogs.filter(log => log.activity === activity);
   const todayLogs = activityLogs.filter(log => {
     const today = new Date().toISOString().split('T')[0];
@@ -160,16 +167,50 @@ export default function ActivityTile({
   };
 
   return (
-    <div className="bg-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-all duration-200 hover:border-accent/20" data-testid={`tile-${activity}`}>
+    <div 
+      className="bg-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-all duration-200 hover:border-accent/20 card-hover group" 
+      data-testid={`tile-${activity}`}
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-xl">{getActivityIcon(activity)}</span>
-          <span className="font-medium text-foreground capitalize">{activity}</span>
+          <div className="flex flex-col">
+            <span className="font-medium text-foreground capitalize">{activity}</span>
+            {customPoints && (
+              <span className="text-xs text-accent border border-accent/20 rounded px-2 py-1 w-fit mt-1">
+                {customPoints} pts/session
+              </span>
+            )}
+          </div>
         </div>
-        {todayLogs.length > 0 && (
-          <div className="w-2 h-2 bg-green-500 rounded-full" title="Logged today" />
-        )}
+        <div className="flex items-center gap-2">
+          {todayLogs.length > 0 && (
+            <div className="w-2 h-2 bg-green-500 rounded-full" title="Logged today" />
+          )}
+          {showActions && (
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                className="h-8 w-8 p-0 rounded hover:bg-accent/20 flex items-center justify-center"
+                onClick={() => onEdit?.(activity)}
+                data-testid={`button-edit-${activity}`}
+                title="Edit activity"
+              >
+                <Edit className="h-3 w-3" />
+              </button>
+              <button
+                className="h-8 w-8 p-0 rounded hover:bg-destructive/20 hover:text-destructive flex items-center justify-center"
+                onClick={() => onDelete?.(activity)}
+                data-testid={`button-delete-${activity}`}
+                title="Delete activity"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Stats Grid */}
