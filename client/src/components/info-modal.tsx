@@ -91,7 +91,6 @@ export default function InfoModal({ isOpen, onClose }: InfoModalProps) {
                 <div>• ❤️ <strong>Therapist:</strong> Empathetic & supportive</div>
                 <div>• 👥 <strong>Friend:</strong> Casual & encouraging</div>
                 <div>• 💪 <strong>Trainer:</strong> High-energy motivation</div>
-                <div>• 🧠 <strong>Father:</strong> Firm but caring guidance</div>
               </div>
             </div>
 

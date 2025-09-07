@@ -10,13 +10,11 @@ interface SettingsModalProps {
     therapist: boolean;
     friend: boolean;
     trainer: boolean;
-    father: boolean;
   };
   onUpdatePersonalities?: (personalities: {
     therapist: boolean;
     friend: boolean;
     trainer: boolean;
-    father: boolean;
   }) => void;
 }
 
@@ -29,7 +27,6 @@ export default function SettingsModal({
     therapist: true,
     friend: true,
     trainer: true,
-    father: true,
   },
   onUpdatePersonalities
 }: SettingsModalProps) {
@@ -97,7 +94,6 @@ export default function SettingsModal({
                 { key: 'therapist', label: 'Therapist', icon: Heart, description: 'Warm, empathetic support' },
                 { key: 'friend', label: 'Friend', icon: Users, description: 'Casual, friendly encouragement' },
                 { key: 'trainer', label: 'Trainer', icon: Dumbbell, description: 'High-energy motivation' },
-                { key: 'father', label: 'Father', icon: Brain, description: 'Firm, tough love approach' },
               ].map(({ key, label, icon: Icon, description }) => (
                 <div key={key} className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-3">

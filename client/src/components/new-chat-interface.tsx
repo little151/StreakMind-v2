@@ -164,7 +164,6 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
                 <div>• <strong className="text-blue-400">Therapist</strong> - Emotional support & understanding</div>
                 <div>• <strong className="text-green-400">Friend</strong> - Casual & encouraging</div>
                 <div>• <strong className="text-orange-400">Trainer</strong> - High-energy motivation</div>
-                <div>• <strong className="text-red-400">Father</strong> - Tough love & accountability</div>
               </div>
             </div>
 
