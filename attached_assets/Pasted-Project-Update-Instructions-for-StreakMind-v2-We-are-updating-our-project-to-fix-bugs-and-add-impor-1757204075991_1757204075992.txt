@@ -1,0 +1,85 @@
+Project Update Instructions for StreakMind-v2
+
+We are updating our project to fix bugs and add important UX and functional improvements. Please implement the following changes:
+
+🛠️ Core Fixes
+
+Chat Reset + Delete Option
+
+Ensure chat history is cleared whenever the page is refreshed.
+
+Add the ability for users to manually delete chats from the UI (individual messages + clear all option).
+
+Cursor behavior: whenever the chat window loads or a message is sent, the typing cursor should stay focused in the chat input field automatically.
+
+Activity Management (CRUD)
+
+The edit and delete options for activities in the dashboard currently don’t work. Fix them so users can reliably:
+
+Edit an activity name, points, or details.
+
+Delete an activity permanently from the dashboard and data.json.
+
+Visualization Choice per Activity
+
+When users add or edit an activity, let them choose how they want it tracked:
+
+Heatmap
+
+Bar chart
+
+Progress bar
+
+Pie chart
+
+Save these visualization preferences in data.json so refreshing does not reset them.
+
+Ensure the dashboard dynamically renders these chosen visualizations.
+
+🎨 UI / UX & Animations
+
+Drop Tile UI Approach
+
+Remove the tile-based score UI. Replace it with a more dynamic, fluid, animation-driven layout.
+
+Animation & Transitions
+
+Add smooth animations across the app:
+
+Chat messages slide/fade in.
+
+Dashboard visualizations load with transitions.
+
+Activity cards expand/collapse with animations.
+
+Navigation elements animate smoothly.
+
+General Styling
+
+Keep the app modern and clean with a dynamic feel.
+
+Prioritize usability while making the interface engaging.
+
+🚫 Personality Modes Update
+
+Remove Father Mode completely from the app.
+
+Keep only the therapist, friend, and trainer modes.
+
+ℹ️ Info (“i”) Modal Update
+
+Update the “i” info/help section to include:
+
+Chat auto-clears on refresh; option to manually delete messages.
+
+Activities now support full CRUD (edit/delete).
+
+Users can assign a visualization type (heatmap, bar, progress bar, pie) when adding/editing activities.
+
+Visualization choices persist across refreshes.
+
+Cursor auto-focuses in chat input.
+
+Tile UI removed → replaced with animated, dynamic dashboard.
+
+Personality modes updated: therapist, friend, trainer only.
