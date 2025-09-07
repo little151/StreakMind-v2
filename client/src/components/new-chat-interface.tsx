@@ -5,8 +5,8 @@ import { Input } from "./ui/input";
 
 interface ChatMessage {
   id: string;
-  content: string;
-  isUser: boolean;
+  role: 'user' | 'assistant';
+  message: string;
   timestamp: string;
 }
 
@@ -33,29 +33,38 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Load messages on component mount
+  useEffect(() => {
+    loadMessages();
+  }, []);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  const loadMessages = async () => {
+    try {
+      const response = await fetch("/api/messages");
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data);
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+  };
+
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      content: inputValue.trim(),
-      isUser: true,
-      timestamp: new Date().toISOString()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.content })
+        body: JSON.stringify({ content: inputValue.trim() })
       });
 
       if (!response.ok) {
@@ -63,15 +72,9 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
       }
 
       const data: ChatResponse = await response.json();
-
-      const botMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        content: data.reply,
-        isUser: false,
-        timestamp: new Date().toISOString()
-      };
-
-      setMessages(prev => [...prev, botMessage]);
+      
+      // Reload messages to get the latest from server
+      await loadMessages();
 
       // Refresh stats if data was updated
       if (data.logEntry) {
@@ -81,13 +84,41 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
       console.error("Error sending message:", error);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        content: "Sorry, I couldn't process that message. Please try again.",
-        isUser: false,
+        role: 'assistant',
+        message: "Sorry, I couldn't process that message. Please try again.",
         timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const deleteMessage = async (messageId: string) => {
+    try {
+      const response = await fetch(`/api/messages/${messageId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        await loadMessages();
+      }
+    } catch (error) {
+      console.error("Error deleting message:", error);
+    }
+  };
+
+  const clearAllMessages = async () => {
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        setMessages([]);
+      }
+    } catch (error) {
+      console.error("Error clearing messages:", error);
     }
   };
 
@@ -180,6 +211,34 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
               </div>
             </div>
 
+            {/* Chat Persistence */}
+            <div>
+              <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                💾 Persistent Chat
+              </h4>
+              <p className="text-muted-foreground mb-2">Your conversations are now saved automatically:</p>
+              <div className="space-y-1 text-muted-foreground ml-4">
+                <div>• Chats persist after page refresh</div>
+                <div>• Delete individual messages by hovering</div>
+                <div>• Clear all messages with "Clear All" button</div>
+                <div>• All data stored locally in chatData.json</div>
+              </div>
+            </div>
+
+            {/* Activity Management */}
+            <div>
+              <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                ⚙️ Activity Management
+              </h4>
+              <p className="text-muted-foreground mb-2">Full control over your habits:</p>
+              <div className="space-y-1 text-muted-foreground ml-4">
+                <div>• Edit activity names on dashboard</div>
+                <div>• Choose visualization types (heatmap, bar, progress, pie)</div>
+                <div>• Delete activities you no longer track</div>
+                <div>• All changes saved to data.json</div>
+              </div>
+            </div>
+
             {/* Tips */}
             <div className="pt-4 border-t border-border">
               <h4 className="font-medium text-foreground mb-2">💡 Pro Tips</h4>
@@ -187,6 +246,8 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
                 <div>• Use "yesterday" to log for previous day</div>
                 <div>• Activities auto-appear in your dashboard</div>
                 <div>• Streaks build with daily consistency</div>
+                <div>• Settings panel is now responsive and scrollable</div>
+                <div>• Smooth animations enhance the experience</div>
                 <div>• Ask me anything - I'm here to help!</div>
               </div>
             </div>
@@ -203,14 +264,27 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
       {/* Header with Info Button */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <h2 className="text-lg font-semibold text-foreground">Chat</h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowInfoModal(true)}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Info className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {messages.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearAllMessages}
+              className="text-muted-foreground hover:text-destructive"
+              title="Clear all messages"
+            >
+              Clear All
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowInfoModal(true)}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Info className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Messages Area */}
@@ -227,18 +301,25 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
           messages.map((message) => (
             <div
               key={message.id}
-              className={`msg ${message.isUser ? 'user' : 'bot'}`}
+              className={`msg ${message.role === 'user' ? 'user' : 'bot'} animate-in slide-in-from-bottom-2 duration-300`}
             >
-              <div className="flex items-start gap-3 max-w-[80%]">
-                {!message.isUser && (
+              <div className="flex items-start gap-3 max-w-[80%] group">
+                {message.role === 'assistant' && (
                   <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
                     <Bot className="h-4 w-4 text-muted-foreground" />
                   </div>
                 )}
-                <div className="bubble">
-                  {message.content}
+                <div className="bubble relative">
+                  {message.message}
+                  <button
+                    onClick={() => deleteMessage(message.id)}
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+                    title="Delete message"
+                  >
+                    ×
+                  </button>
                 </div>
-                {message.isUser && (
+                {message.role === 'user' && (
                   <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                     <User className="h-4 w-4 text-primary-foreground" />
                   </div>
