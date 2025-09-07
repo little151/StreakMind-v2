@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { TrendingUp } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "../lib/queryClient";
 import ActivityTile from "./activity-tile";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 
 interface Stats {
   totalPoints: number;
@@ -22,6 +28,10 @@ interface NewDashboardProps {
 }
 
 export default function NewDashboard({ stats }: NewDashboardProps) {
+  const [editingActivity, setEditingActivity] = useState<string | null>(null);
+  const [newActivityName, setNewActivityName] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   if (!stats) {
     return (
       <div className="h-full p-6 overflow-y-auto bg-background flex items-center justify-center">
@@ -29,6 +39,50 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
       </div>
     );
   }
+
+  const updateActivityMutation = useMutation({
+    mutationFn: async ({ oldName, newName }: { oldName: string; newName: string }) => {
+      const response = await apiRequest('PUT', `/api/activities/${oldName}`, { name: newName });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+      setIsEditDialogOpen(false);
+      setEditingActivity(null);
+      setNewActivityName("");
+    },
+  });
+
+  const deleteActivityMutation = useMutation({
+    mutationFn: async (activityName: string) => {
+      const response = await apiRequest('DELETE', `/api/activities/${activityName}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+    },
+  });
+
+  const handleEditActivity = (activityName: string) => {
+    setEditingActivity(activityName);
+    setNewActivityName(activityName);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDeleteActivity = (activityName: string) => {
+    if (confirm(`Are you sure you want to delete "${activityName}"? This will remove all related data.`)) {
+      deleteActivityMutation.mutate(activityName);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (editingActivity && newActivityName.trim() && newActivityName !== editingActivity) {
+      updateActivityMutation.mutate({
+        oldName: editingActivity,
+        newName: newActivityName.trim()
+      });
+    }
+  };
 
   // Get unique activities and their data
   const activities = Object.keys(stats.streaks);
@@ -75,6 +129,8 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
                 recentLogs={stats.logs}
                 totalPoints={getActivityPoints(activity)}
                 visualization={getVisualizationType(activity)}
+                onEdit={handleEditActivity}
+                onDelete={handleDeleteActivity}
               />
             ))}
           </div>
@@ -87,6 +143,43 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
             <p className="text-muted-foreground mb-4">Start by chatting about your activities or creating new habits</p>
           </div>
         )}
+
+        {/* Edit Activity Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Activity</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="activity-name">Activity Name</Label>
+                <Input
+                  id="activity-name"
+                  value={newActivityName}
+                  onChange={(e) => setNewActivityName(e.target.value)}
+                  placeholder="Enter activity name"
+                  data-testid="input-edit-activity-name"
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditDialogOpen(false)}
+                  data-testid="button-cancel-edit"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveEdit}
+                  disabled={!newActivityName.trim() || newActivityName === editingActivity || updateActivityMutation.isPending}
+                  data-testid="button-save-edit"
+                >
+                  {updateActivityMutation.isPending ? "Saving..." : "Save"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">

@@ -37,7 +37,6 @@ export interface AppData {
       therapist: boolean;
       friend: boolean;
       trainer: boolean;
-      father: boolean;
     };
   };
 }
@@ -59,7 +58,6 @@ export function loadData(): AppData {
           therapist: true,
           friend: true,
           trainer: true,
-          father: true,
         }
       }
     };
@@ -77,7 +75,6 @@ export function loadData(): AppData {
           therapist: true,
           friend: true,
           trainer: true,
-          father: true,
         }
       }
     };

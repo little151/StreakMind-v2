@@ -18,7 +18,7 @@ import {
 } from "./data-helpers";
 
 // Enhanced personality system functions
-function detectPersonalityNeeded(message: string): 'therapist' | 'friend' | 'trainer' | 'father' | 'default' {
+function detectPersonalityNeeded(message: string): 'therapist' | 'friend' | 'trainer' | 'default' {
   const text = message.toLowerCase();
   
   // Therapist mode: emotional support, struggles, feelings
@@ -28,17 +28,13 @@ function detectPersonalityNeeded(message: string): 'therapist' | 'friend' | 'tra
     return 'therapist';
   }
   
-  // Father mode: discipline, tough love, accountability
-  if (text.includes('lazy') || text.includes('procrastinating') || text.includes('excuse') ||
-      text.includes('skip') || text.includes('missed') || text.includes('didn\'t do') ||
-      text.includes('failed') || text.includes('disappointed')) {
-    return 'father';
-  }
-  
-  // Trainer mode: fitness, pushing limits, performance
+  // Trainer mode: fitness, pushing limits, performance, accountability
   if (text.includes('gym') || text.includes('workout') || text.includes('exercise') ||
       text.includes('push') || text.includes('harder') || text.includes('challenge') ||
-      text.includes('pr') || text.includes('personal record') || text.includes('lift')) {
+      text.includes('pr') || text.includes('personal record') || text.includes('lift') ||
+      text.includes('lazy') || text.includes('procrastinating') || text.includes('excuse') ||
+      text.includes('skip') || text.includes('missed') || text.includes('didn\'t do') ||
+      text.includes('failed') || text.includes('disappointed')) {
     return 'trainer';
   }
   
@@ -80,9 +76,7 @@ function buildEnhancedPrompt(
   const modePrompts = {
     therapist: `You are StreakMind in therapist mode: warm, empathetic, understanding, and supportive. Provide emotional support and gentle encouragement. Ask thoughtful questions about their feelings and offer comfort. Keep responses caring but concise (2-3 sentences max). ${baseContext}`,
     
-    father: `You are StreakMind in father mode: firm but loving, providing tough love and accountability. Call out excuses, push for discipline, but always show you care about their growth. Use direct language and high expectations. Keep responses firm but brief (2-3 sentences max). ${baseContext}`,
-    
-    trainer: `You are StreakMind in trainer mode: energetic, motivational, focused on pushing limits and celebrating victories. Use fitness terminology and pump them up. Focus on progress, gains, and next challenges. Keep responses high-energy but concise (2-3 sentences max). ${baseContext}`,
+    trainer: `You are StreakMind in trainer mode: energetic, motivational, focused on pushing limits and celebrating victories. Use fitness terminology and pump them up. When users show accountability issues, provide firm but caring motivation. Focus on progress, gains, and next challenges. Keep responses high-energy but concise (2-3 sentences max). ${baseContext}`,
     
     friend: `You are StreakMind in friend mode: casual, supportive, fun, and relatable. Chat like a good friend who genuinely cares about their progress. Be encouraging and positive. Keep responses friendly and conversational (2-3 sentences max). ${baseContext}`,
     
