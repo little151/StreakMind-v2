@@ -117,9 +117,15 @@ export default function InfoModal({ isOpen, onClose }: InfoModalProps) {
               <div className="space-y-1 text-muted-foreground ml-4 text-sm">
                 <div>• Toggle scores & badges ON/OFF</div>
                 <div>• Enable/disable personality modes</div>
+                <div>• Responsive, scrollable settings panel</div>
+                <div>• Persistent chat storage (chatData.json)</div>
+                <div>• Activity file storage (data.json)</div>
+                <div>• Delete individual chat messages</div>
+                <div>• Clear all chat history</div>
+                <div>• Smooth UI animations throughout</div>
                 <div>• General AI chat for any questions</div>
                 <div>• Modern tile-based dashboard</div>
-                <div>• Activity quick-edit on hover</div>
+                <div>• Activity quick-edit with visualization types</div>
               </div>
             </div>
           </div>
