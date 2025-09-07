@@ -30,6 +30,7 @@ export interface AppData {
   visualizations: Record<string, any>;
   streaks: Record<string, number>;
   activities: Record<string, Activity>; // New: store activity metadata
+  messages: Array<{ id: string; content: string; isFromUser: boolean; timestamp: string }>;
   settings: {
     showScores: boolean;
     enabledPersonalities: {
@@ -51,6 +52,7 @@ export function loadData(): AppData {
       visualizations: data.visualizations || {},
       streaks: data.streaks || {},
       activities: data.activities || {},
+      messages: data.messages || [],
       settings: data.settings || {
         showScores: true,
         enabledPersonalities: {
@@ -68,6 +70,7 @@ export function loadData(): AppData {
       visualizations: {}, 
       streaks: {},
       activities: {},
+      messages: [],
       settings: {
         showScores: true,
         enabledPersonalities: {

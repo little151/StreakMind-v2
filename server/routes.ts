@@ -155,7 +155,236 @@ function isGeneralQuery(message: string): boolean {
 export function createApiRouter(genai: any) {
   const router = Router();
 
-  // -------------------- Chat Endpoint --------------------
+  // -------------------- Messages Endpoints --------------------
+  
+  // Get all messages
+  router.get("/messages", (req, res) => {
+    try {
+      const data = loadData();
+      res.json(data.messages || []);
+    } catch (error) {
+      console.error("Get messages error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Send a new message
+  router.post("/messages", async (req, res) => {
+    try {
+      const { content } = req.body;
+      if (!content || typeof content !== "string") {
+        return res.status(400).json({ error: "Message content is required" });
+      }
+
+      const data = loadData();
+      
+      // Add user message
+      const userMessage = {
+        id: randomUUID(),
+        content,
+        isFromUser: true,
+        timestamp: new Date().toISOString(),
+      };
+      data.messages.push(userMessage);
+
+      // Check for dynamic activity creation first
+      const newActivity = handleDynamicActivityCreation(content, data);
+      if (newActivity) {
+        saveData(data);
+        // Generate response for new activity creation
+        const personalityMode = detectPersonalityNeeded(content);
+        const systemPrompt = buildEnhancedPrompt(personalityMode, data, null, 0, false, false);
+        
+        let activityReply = "";
+        try {
+          const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+          const model = genai.getGenerativeModel({ model: modelName });
+          const prompt = `${systemPrompt}\n\nUser wants to start tracking a new habit: "${newActivity}". Congratulate them on adding this new habit and encourage them to start their first log.`;
+          const response = await model.generateContent(prompt);
+          activityReply = response?.response?.text()?.trim() || `Great! I've added "${newActivity}" to your habit tracking. Start logging it today!`;
+        } catch (err) {
+          console.error("Gemini API error:", err);
+          activityReply = `Perfect! I've added "${newActivity}" to your habits. You can now track it by mentioning it in our chat!`;
+        }
+        
+        // Add bot response
+        const botMessage = {
+          id: randomUUID(),
+          content: activityReply,
+          isFromUser: false,
+          timestamp: new Date().toISOString(),
+        };
+        data.messages.push(botMessage);
+        saveData(data);
+        
+        return res.json({ reply: activityReply, newActivity, activityCreated: true });
+      }
+
+      const existingActivities = Object.keys(data.streaks);
+      const logIntent = parseLogIntent(content, existingActivities);
+
+      let reply = "";
+      let logEntry: LogEntry | null = null;
+      let pointsAwarded = 0;
+      let streakUpdated = false;
+
+      // Logging flow
+      if (logIntent) {
+        const { activity, amount, unit, date } = logIntent;
+
+        pointsAwarded = calculatePoints(activity, amount, unit, data);
+
+        if (shouldIncrementStreak(data, activity, date)) {
+          data.streaks[activity] = (data.streaks[activity] || 0) + 1;
+          streakUpdated = true;
+        }
+
+        logEntry = {
+          id: randomUUID(),
+          activity,
+          amount,
+          unit,
+          date,
+          message: content,
+          timestamp: new Date().toISOString(),
+          points: pointsAwarded,
+        };
+
+        data.logs.push(logEntry);
+        data.scores.push({
+          id: randomUUID(),
+          points: pointsAwarded,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // Check if this is a general query or habit-related
+      const isGeneral = isGeneralQuery(content);
+      const personalityMode = isGeneral ? 'default' : detectPersonalityNeeded(content);
+      const systemPrompt = buildEnhancedPrompt(personalityMode, data, logEntry, pointsAwarded, streakUpdated, isGeneral);
+      
+      // Handle CRUD commands
+      const crudCommand = parseCRUDCommand(content);
+      if (crudCommand.action && !isGeneral) {
+        let crudResult = '';
+        
+        switch (crudCommand.action) {
+          case 'delete':
+            if (crudCommand.activity && deleteActivity(data, crudCommand.activity)) {
+              crudResult = `Deleted "${crudCommand.activity}" from your habits.`;
+            } else {
+              crudResult = `Couldn't find "${crudCommand.activity}" to delete.`;
+            }
+            break;
+            
+          case 'update':
+            if (crudCommand.activity && crudCommand.newName && updateActivity(data, crudCommand.activity, { name: crudCommand.newName })) {
+              crudResult = `Renamed "${crudCommand.activity}" to "${crudCommand.newName}".`;
+            } else {
+              crudResult = `Couldn't rename "${crudCommand.activity}".`;
+            }
+            break;
+            
+          case 'setpoints':
+            if (crudCommand.activity && crudCommand.points !== undefined && updateActivity(data, crudCommand.activity, { customPoints: crudCommand.points })) {
+              crudResult = `Set "${crudCommand.activity}" to ${crudCommand.points} points per session.`;
+            } else {
+              crudResult = `Couldn't set points for "${crudCommand.activity}".`;
+            }
+            break;
+        }
+        
+        if (crudResult) {
+          const botMessage = {
+            id: randomUUID(),
+            content: crudResult,
+            isFromUser: false,
+            timestamp: new Date().toISOString(),
+          };
+          data.messages.push(botMessage);
+          saveData(data);
+          return res.json({ reply: crudResult, crudAction: crudCommand.action });
+        }
+      }
+
+      const userContext = logEntry
+        ? `User logged: ${logEntry.activity} (${logEntry.amount} ${logEntry.unit}). Points awarded: ${pointsAwarded}. ${streakUpdated ? `Streak updated to ${data.streaks[logEntry.activity]}.` : "Streak unchanged."}`
+        : content;
+
+      // Use Gemini API
+      try {
+        const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+        const model = genai.getGenerativeModel({ model: modelName });
+
+        const prompt = `${systemPrompt}\n\n${userContext}`;
+
+        const response = await model.generateContent(prompt);
+
+        reply = response?.response?.text()?.trim() || "Logged! Keep it up.";
+      } catch (err) {
+        console.error("Gemini API error:", err);
+        reply = logEntry
+          ? `Great job! +${pointsAwarded} points. ${streakUpdated ? `${logEntry.activity} streak: ${data.streaks[logEntry.activity]} days!` : ""}`
+          : "⚠️ I couldn't reach the brain right now, but your log is saved.";
+      }
+
+      // Add bot response
+      const botMessage = {
+        id: randomUUID(),
+        content: reply,
+        isFromUser: false,
+        timestamp: new Date().toISOString(),
+      };
+      data.messages.push(botMessage);
+      saveData(data);
+
+      res.json({
+        reply,
+        logEntry,
+        pointsAwarded,
+        streakUpdated,
+        currentStreak: logEntry ? data.streaks[logEntry.activity] || 0 : null,
+      });
+    } catch (error) {
+      console.error("Messages endpoint error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Delete all messages
+  router.delete("/messages", (req, res) => {
+    try {
+      const data = loadData();
+      data.messages = [];
+      saveData(data);
+      res.json({ message: "All messages deleted successfully" });
+    } catch (error) {
+      console.error("Delete all messages error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Delete a specific message
+  router.delete("/messages/:id", (req, res) => {
+    try {
+      const { id } = req.params;
+      const data = loadData();
+      const messageIndex = data.messages.findIndex(msg => msg.id === id);
+      
+      if (messageIndex === -1) {
+        return res.status(404).json({ error: "Message not found" });
+      }
+      
+      data.messages.splice(messageIndex, 1);
+      saveData(data);
+      res.json({ message: "Message deleted successfully" });
+    } catch (error) {
+      console.error("Delete message error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // -------------------- Chat Endpoint (Legacy) --------------------
   router.post("/chat", async (req, res) => {
     try {
       const { message } = req.body;
