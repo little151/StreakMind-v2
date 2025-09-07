@@ -21,7 +21,7 @@ export interface Activity {
   customPoints?: number; // User can override default points
   createdAt: string;
   description?: string;
-  visualizationType: 'calendar' | 'ring' | 'bar';
+  visualizationType: 'heatmap' | 'bar' | 'progress' | 'pie';
 }
 
 export interface AppData {
@@ -309,11 +309,12 @@ export function deleteActivity(data: AppData, name: string): boolean {
   return true;
 }
 
-function getVisualizationType(activity: string): 'calendar' | 'ring' | 'bar' {
+function getVisualizationType(activity: string): 'heatmap' | 'bar' | 'progress' | 'pie' {
   const activityLower = activity.toLowerCase();
-  if (activityLower.includes('coding') || activityLower.includes('code')) return 'calendar';
-  if (activityLower.includes('gym') || activityLower.includes('workout')) return 'ring';
-  return 'bar';
+  if (activityLower.includes('coding') || activityLower.includes('code')) return 'heatmap';
+  if (activityLower.includes('gym') || activityLower.includes('workout')) return 'progress';
+  if (activityLower.includes('sleep')) return 'bar';
+  return 'pie';
 }
 
 // Enhanced chat command parsing for CRUD operations

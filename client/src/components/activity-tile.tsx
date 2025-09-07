@@ -14,7 +14,7 @@ interface ActivityTileProps {
     timestamp: string;
   }>;
   totalPoints: number;
-  visualization: 'calendar' | 'ring' | 'bar';
+  visualization: 'heatmap' | 'bar' | 'progress' | 'pie';
   customPoints?: number;
   onEdit?: (activity: string) => void;
   onDelete?: (activity: string) => void;
@@ -101,7 +101,7 @@ export default function ActivityTile({
 
   const renderVisualization = () => {
     switch (visualization) {
-      case 'calendar':
+      case 'heatmap':
         const calendarData = generateCalendarData();
         return (
           <div className="flex gap-1 mt-3">
@@ -119,7 +119,7 @@ export default function ActivityTile({
           </div>
         );
       
-      case 'ring':
+      case 'progress':
         const progress = generateProgressData();
         return (
           <div className="relative w-16 h-16 mt-3 mx-auto">
@@ -157,6 +157,45 @@ export default function ActivityTile({
             </div>
             <div className="text-xs text-muted-foreground mt-1 text-center">
               {Math.round(barProgress)}% of target
+            </div>
+          </div>
+        );
+
+      case 'pie':
+        const pieProgress = generateProgressData();
+        const remaining = 100 - pieProgress;
+        const radius = 20;
+        const circumference = 2 * Math.PI * radius;
+        const strokeDasharray = `${(pieProgress / 100) * circumference} ${circumference}`;
+        
+        return (
+          <div className="mt-3 flex items-center justify-center">
+            <div className="relative w-16 h-16">
+              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 44 44">
+                <circle
+                  cx="22"
+                  cy="22"
+                  r={radius}
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                  className="text-muted"
+                />
+                <circle
+                  cx="22"
+                  cy="22"
+                  r={radius}
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                  strokeDasharray={strokeDasharray}
+                  strokeLinecap="round"
+                  className="text-accent transition-all duration-300"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-foreground">
+                {Math.round(pieProgress)}%
+              </div>
             </div>
           </div>
         );

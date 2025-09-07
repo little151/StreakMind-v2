@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 interface Stats {
   totalPoints: number;
@@ -30,6 +31,7 @@ interface NewDashboardProps {
 export default function NewDashboard({ stats }: NewDashboardProps) {
   const [editingActivity, setEditingActivity] = useState<string | null>(null);
   const [newActivityName, setNewActivityName] = useState("");
+  const [selectedVisualization, setSelectedVisualization] = useState<'heatmap' | 'bar' | 'progress' | 'pie'>('heatmap');
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   if (!stats) {
@@ -41,8 +43,8 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
   }
 
   const updateActivityMutation = useMutation({
-    mutationFn: async ({ oldName, newName }: { oldName: string; newName: string }) => {
-      const response = await apiRequest('PUT', `/api/activities/${oldName}`, { name: newName });
+    mutationFn: async ({ oldName, updates }: { oldName: string; updates: { name?: string; visualizationType?: string } }) => {
+      const response = await apiRequest('PUT', `/api/activities/${oldName}`, updates);
       return response.json();
     },
     onSuccess: () => {
@@ -50,6 +52,7 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
       setIsEditDialogOpen(false);
       setEditingActivity(null);
       setNewActivityName("");
+      setSelectedVisualization('heatmap');
     },
   });
 
@@ -66,6 +69,7 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
   const handleEditActivity = (activityName: string) => {
     setEditingActivity(activityName);
     setNewActivityName(activityName);
+    setSelectedVisualization(getVisualizationType(activityName));
     setIsEditDialogOpen(true);
   };
 
@@ -76,11 +80,25 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
   };
 
   const handleSaveEdit = () => {
-    if (editingActivity && newActivityName.trim() && newActivityName !== editingActivity) {
-      updateActivityMutation.mutate({
-        oldName: editingActivity,
-        newName: newActivityName.trim()
-      });
+    if (editingActivity) {
+      const updates: { name?: string; visualizationType?: string } = {};
+      
+      if (newActivityName.trim() && newActivityName !== editingActivity) {
+        updates.name = newActivityName.trim();
+      }
+      
+      if (selectedVisualization !== getVisualizationType(editingActivity)) {
+        updates.visualizationType = selectedVisualization;
+      }
+      
+      if (Object.keys(updates).length > 0) {
+        updateActivityMutation.mutate({
+          oldName: editingActivity,
+          updates
+        });
+      } else {
+        setIsEditDialogOpen(false);
+      }
     }
   };
 
@@ -95,11 +113,12 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
   };
 
   // Determine visualization type for each activity
-  const getVisualizationType = (activity: string): 'calendar' | 'ring' | 'bar' => {
+  const getVisualizationType = (activity: string): 'heatmap' | 'bar' | 'progress' | 'pie' => {
     const activityLower = activity.toLowerCase();
-    if (activityLower.includes('coding') || activityLower.includes('code')) return 'calendar';
-    if (activityLower.includes('gym') || activityLower.includes('workout')) return 'ring';
-    return 'bar';
+    if (activityLower.includes('coding') || activityLower.includes('code')) return 'heatmap';
+    if (activityLower.includes('gym') || activityLower.includes('workout')) return 'progress';
+    if (activityLower.includes('sleep')) return 'bar';
+    return 'pie';
   };
 
   return (
@@ -161,6 +180,21 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
                   data-testid="input-edit-activity-name"
                 />
               </div>
+              
+              <div>
+                <Label htmlFor="visualization-type">Visualization Type</Label>
+                <Select value={selectedVisualization} onValueChange={(value: 'heatmap' | 'bar' | 'progress' | 'pie') => setSelectedVisualization(value)}>
+                  <SelectTrigger data-testid="select-visualization-type">
+                    <SelectValue placeholder="Select visualization type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="heatmap">🗓️ Heatmap Calendar</SelectItem>
+                    <SelectItem value="bar">📊 Bar Chart</SelectItem>
+                    <SelectItem value="progress">🎯 Progress Ring</SelectItem>
+                    <SelectItem value="pie">🥧 Pie Chart</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex justify-end space-x-2">
                 <Button
                   variant="outline"
@@ -171,7 +205,7 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
                 </Button>
                 <Button
                   onClick={handleSaveEdit}
-                  disabled={!newActivityName.trim() || newActivityName === editingActivity || updateActivityMutation.isPending}
+                  disabled={(!newActivityName.trim() || (newActivityName === editingActivity && selectedVisualization === getVisualizationType(editingActivity || ''))) || updateActivityMutation.isPending}
                   data-testid="button-save-edit"
                 >
                   {updateActivityMutation.isPending ? "Saving..." : "Save"}
