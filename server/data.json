@@ -119,6 +119,16 @@
       "message": "i want to delete Gamin",
       "timestamp": "2025-09-06T22:56:00.919Z",
       "points": 0
+    },
+    {
+      "id": "f6a7ff19-7dc4-4f50-a2fd-cd9fc8b3eff7",
+      "activity": "gym",
+      "amount": 1,
+      "unit": "session",
+      "date": "2025-09-07",
+      "message": "Went to gym",
+      "timestamp": "2025-09-07T00:24:30.776Z",
+      "points": 10
     }
   ],
   "scores": [
@@ -181,13 +191,28 @@
       "id": "7bb605db-2c76-4bdf-b6ab-45a6bef39597",
       "points": 0,
       "timestamp": "2025-09-06T22:56:00.919Z"
+    },
+    {
+      "id": "5d02ab46-25c4-49b7-b60c-e19fb73645b7",
+      "points": 10,
+      "timestamp": "2025-09-07T00:24:30.776Z"
     }
   ],
   "visualizations": {},
   "streaks": {
     "coding": 2,
-    "gym": 2,
+    "gym": 3,
     "gaming": 1,
     "gamin": 1
+  },
+  "activities": {},
+  "messages": [],
+  "settings": {
+    "showScores": true,
+    "enabledPersonalities": {
+      "therapist": true,
+      "friend": true,
+      "trainer": true
+    }
   }
 }
