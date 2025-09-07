@@ -1,7 +1,7 @@
 # 📌 StreakMind  
 
 **StreakMind** is an AI-powered **habit tracker + personal companion** that blends conversational AI with a flexible activity dashboard.  
-It’s designed to act as a **therapist, friend, trainer, and even a tough-love father** — while giving you full manual control over how you track and score your activities.  
+It’s designed to act as a **therapist, friend, and trainer** — while giving you full manual control over how you track and score your activities.  
 
 ---
 
@@ -23,37 +23,43 @@ Think of it as a **coach and companion in one app**.
 - Chat like you would with a friend or therapist.  
 - If you ask a **generic question**, it answers like a normal AI assistant.  
 - If you talk about **habits or streaks**, it automatically updates your logs.  
+- Chat history now **persists across refresh** (saved in local storage / JSON file during testing).  
+- Option to **delete individual chats** or clear all chats.  
 
 ### 🔹 Activity Management  
 - **Add activities via chat** (e.g., *“I want to track reading books”*).  
-- **Manual dashboard controls** → Add or remove activities with buttons.  
+- **Manual dashboard controls** → Add, edit, or delete activities with buttons.  
 - Full **CRUD support** (Create, Read, Update, Delete) via both chat & UI.  
+- Choose **custom points** per activity or use defaults.  
 
 ### 🔹 Personality Modes  
 - Default roles: **Therapist, Friend, Trainer**.  
-- Toggle personalities ON/OFF in settings (e.g., disable “Father” mode).  
+- Toggle personalities ON/OFF in settings.  
 
 ### 🔹 Scoring & Streaks  
 - Default points per activity (e.g., +10 per log).  
 - Option for **custom user-defined points** per activity.  
 - Scoreboard visibility toggle:  
-  - ON → shows **tile-based dashboard**  
+  - ON → shows activity dashboard with streaks, points, progress.  
   - OFF → hides it completely.  
 
 ### 🔹 Dashboard UI  
-- **Tile-based layout** → each activity displayed as a tile with streaks, points, progress.  
-- Quick-edit options (rename, delete, update points).  
+- **Dynamic layout** with animations and transitions.  
+- Each activity displayed with progress visualization (heatmap, bar, pie, progress bar).  
+- Choice of visualization style is **saved per activity**.  
+- Smooth animations for adding, editing, and deleting activities.  
 - Dark theme default, light theme optional.  
 
 ### 🔹 Info (“i”) Button  
 Explains how to:  
 - Log activities via chat  
-- Manually add/delete activities  
+- Manually add/delete/edit activities  
 - Use CRUD commands  
 - Toggle personalities  
 - Customize points  
 - Hide/show the score dashboard  
 - Use AI for generic Q&A  
+- Manage chat history (persistent + deletable)  
 
 ---
 
@@ -62,14 +68,14 @@ Explains how to:
 - **Frontend**: React + TypeScript + TailwindCSS  
 - **Backend**: Node.js + Express  
 - **AI Engine**: Google Gemini API  
-- **State/Data**: Local + API-driven logs  
-- **Styling**: Tile-based, modern UI  
+- **State/Data**: Local + JSON file (for testing persistence) + API-driven logs  
+- **Styling**: Modern animated UI  
 
 ---
 
 ## ⚙️ Installation  
 
-## bash
+# bash
 # Clone repo
 git clone https://github.com/little151/StreakMind-v2.git
 
@@ -83,6 +89,7 @@ npm install
 # Install server dependencies
 cd ../server
 npm install
+
 
 
 ## 🔮 Roadmap
