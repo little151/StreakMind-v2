@@ -35,7 +35,7 @@ export default function SettingsModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" data-testid="modal-settings">
-      <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full">
+      <div className="bg-card border border-border rounded-lg p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
@@ -52,7 +52,7 @@ export default function SettingsModal({
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto">
           {/* Scores Visibility Toggle */}
           <div className="flex items-center justify-between">
             <div>

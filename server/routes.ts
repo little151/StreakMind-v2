@@ -12,9 +12,15 @@ import {
   updateActivity,
   deleteActivity,
   parseCRUDCommand,
+  loadChatData,
+  saveChatData,
+  addChatMessage,
+  deleteChatMessage,
+  clearAllChatMessages,
   type LogEntry,
   type Activity,
   type AppData,
+  type ChatMessage,
 } from "./data-helpers";
 
 // Enhanced personality system functions
@@ -154,8 +160,8 @@ export function createApiRouter(genai: any) {
   // Get all messages
   router.get("/messages", (req, res) => {
     try {
-      const data = loadData();
-      res.json(data.messages || []);
+      const messages = loadChatData();
+      res.json(messages);
     } catch (error) {
       console.error("Get messages error:", error);
       res.status(500).json({ error: "Internal server error" });
@@ -173,13 +179,13 @@ export function createApiRouter(genai: any) {
       const data = loadData();
       
       // Add user message
-      const userMessage = {
+      const userMessage: ChatMessage = {
         id: randomUUID(),
-        content,
-        isFromUser: true,
+        role: 'user',
+        message: content,
         timestamp: new Date().toISOString(),
       };
-      data.messages.push(userMessage);
+      addChatMessage(userMessage);
 
       // Check for dynamic activity creation first
       const newActivity = handleDynamicActivityCreation(content, data);
@@ -202,13 +208,13 @@ export function createApiRouter(genai: any) {
         }
         
         // Add bot response
-        const botMessage = {
+        const botMessage: ChatMessage = {
           id: randomUUID(),
-          content: activityReply,
-          isFromUser: false,
+          role: 'assistant',
+          message: activityReply,
           timestamp: new Date().toISOString(),
         };
-        data.messages.push(botMessage);
+        addChatMessage(botMessage);
         saveData(data);
         
         return res.json({ reply: activityReply, newActivity, activityCreated: true });
@@ -289,13 +295,13 @@ export function createApiRouter(genai: any) {
         }
         
         if (crudResult) {
-          const botMessage = {
+          const botMessage: ChatMessage = {
             id: randomUUID(),
-            content: crudResult,
-            isFromUser: false,
+            role: 'assistant',
+            message: crudResult,
             timestamp: new Date().toISOString(),
           };
-          data.messages.push(botMessage);
+          addChatMessage(botMessage);
           saveData(data);
           return res.json({ reply: crudResult, crudAction: crudCommand.action });
         }
@@ -323,13 +329,13 @@ export function createApiRouter(genai: any) {
       }
 
       // Add bot response
-      const botMessage = {
+      const botMessage: ChatMessage = {
         id: randomUUID(),
-        content: reply,
-        isFromUser: false,
+        role: 'assistant',
+        message: reply,
         timestamp: new Date().toISOString(),
       };
-      data.messages.push(botMessage);
+      addChatMessage(botMessage);
       saveData(data);
 
       res.json({
@@ -348,9 +354,7 @@ export function createApiRouter(genai: any) {
   // Delete all messages
   router.delete("/messages", (req, res) => {
     try {
-      const data = loadData();
-      data.messages = [];
-      saveData(data);
+      clearAllChatMessages();
       res.json({ message: "All messages deleted successfully" });
     } catch (error) {
       console.error("Delete all messages error:", error);
@@ -362,15 +366,14 @@ export function createApiRouter(genai: any) {
   router.delete("/messages/:id", (req, res) => {
     try {
       const { id } = req.params;
-      const data = loadData();
-      const messageIndex = data.messages.findIndex(msg => msg.id === id);
+      const messages = loadChatData();
+      const messageExists = messages.some(msg => msg.id === id);
       
-      if (messageIndex === -1) {
+      if (!messageExists) {
         return res.status(404).json({ error: "Message not found" });
       }
       
-      data.messages.splice(messageIndex, 1);
-      saveData(data);
+      deleteChatMessage(id);
       res.json({ message: "Message deleted successfully" });
     } catch (error) {
       console.error("Delete message error:", error);

@@ -2,6 +2,7 @@ import fs from "fs";
 import { randomUUID } from "crypto";
 
 const DATA_FILE = "./server/data.json";
+const CHAT_FILE = "./server/chatData.json";
 
 // Data structure interface
 export interface LogEntry {
@@ -13,6 +14,13 @@ export interface LogEntry {
   message: string;
   timestamp: string;
   points: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  message: string;
+  timestamp: string;
 }
 
 export interface Activity {
@@ -30,7 +38,6 @@ export interface AppData {
   visualizations: Record<string, any>;
   streaks: Record<string, number>;
   activities: Record<string, Activity>; // New: store activity metadata
-  messages: Array<{ id: string; content: string; isFromUser: boolean; timestamp: string }>;
   settings: {
     showScores: boolean;
     enabledPersonalities: {
@@ -51,7 +58,6 @@ export function loadData(): AppData {
       visualizations: data.visualizations || {},
       streaks: data.streaks || {},
       activities: data.activities || {},
-      messages: data.messages || [],
       settings: data.settings || {
         showScores: true,
         enabledPersonalities: {
@@ -68,7 +74,6 @@ export function loadData(): AppData {
       visualizations: {}, 
       streaks: {},
       activities: {},
-      messages: [],
       settings: {
         showScores: true,
         enabledPersonalities: {
@@ -359,4 +364,37 @@ export function parseCRUDCommand(message: string): {
   }
   
   return { action: null };
+}
+
+// Chat data management functions
+export function loadChatData(): ChatMessage[] {
+  try {
+    const data = JSON.parse(fs.readFileSync(CHAT_FILE, "utf8"));
+    return data.messages || [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveChatData(messages: ChatMessage[]) {
+  fs.writeFileSync(CHAT_FILE, JSON.stringify({ messages }, null, 2));
+}
+
+export function addChatMessage(message: ChatMessage): ChatMessage[] {
+  const messages = loadChatData();
+  messages.push(message);
+  saveChatData(messages);
+  return messages;
+}
+
+export function deleteChatMessage(messageId: string): ChatMessage[] {
+  const messages = loadChatData();
+  const filteredMessages = messages.filter(msg => msg.id !== messageId);
+  saveChatData(filteredMessages);
+  return filteredMessages;
+}
+
+export function clearAllChatMessages(): ChatMessage[] {
+  saveChatData([]);
+  return [];
 }
