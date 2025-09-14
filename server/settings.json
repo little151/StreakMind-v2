@@ -1,9 +1,9 @@
 {
-  "showScores": true,
+  "showScores": false,
   "enabledPersonalities": {
-    "therapist": true,
-    "friend": true,
-    "trainer": false
+    "therapist": false,
+    "friend": false,
+    "trainer": true
   },
   "theme": "system",
   "notifications": {

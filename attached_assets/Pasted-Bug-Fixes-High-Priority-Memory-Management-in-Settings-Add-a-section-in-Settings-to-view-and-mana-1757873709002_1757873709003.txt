@@ -1,0 +1,90 @@
+Bug Fixes (High Priority)
+
+Memory Management in Settings
+
+Add a section in Settings to view and manage stored memories (memory.json).
+
+Each memory entry should be displayed in a list with a ❌ delete button.
+
+On delete → remove the memory from memory.json and update the UI dynamically.
+
+Dashboard Activity Tiles Not Rendering
+
+Investigate why activity tiles are missing from the Dashboard.
+
+Ensure CRUD operations (create, update, delete activities) are working with dashboard.json.
+
+Activities should render immediately after creation.
+
+"Show Scores & Gamification" Toggle Not Working
+
+Fix the toggle in Settings so it actually hides/shows the Score System & Gamification UI.
+
+Persist toggle state in settings.json so the preference remains across sessions.
+
+🔹 Feature Updates & Enhancements
+1. Drag & Drop Dashboard Layout
+
+Enable drag-and-drop functionality to rearrange activity tiles on the Dashboard.
+
+Save tile order in dashboard.json.
+
+Ensure layout persists across sessions.
+
+Add smooth animations for tile movement.
+
+2. Custom Goals & Streak Tracking
+
+Extend activity tiles with custom goal settings (e.g., “5 hrs coding/week” or “Read 10 pages/day”).
+
+Track progress automatically and update tile UI.
+
+Highlight missed goals (e.g., red border or ⚠️ icon).
+
+Add streak tracking:
+
+If a user meets the goal daily/weekly → streak count increases.
+
+If missed → streak resets.
+
+Persist all goal/streak data in dashboard.json.
+
+3. Analytics Dashboard
+
+Create a new Analytics tab accessible from the sidebar.
+
+Visualizations:
+
+Chat activity by time of day (line chart).
+
+Activity progress vs. goals (bar chart).
+
+Streak history (heatmap or calendar view).
+
+Use charts with clean, minimal styling.
+
+Fetch data from chats.json and dashboard.json.
+
+4. Offline-First Mode with Sync (Prototype)
+
+Implement offline-first support:
+
+Use browser local storage / IndexedDB as a fallback when offline.
+
+Sync with JSON files (settings.json, memory.json, chats.json, dashboard.json) when back online.
+
+Add a toggle in Settings for “Enable Cloud Sync”:
+
+ON → data syncs to backend (or GitHub stub for now).
+
+OFF → app works completely offline using local storage only.
+
+🔹 General Requirements
+
+Ensure smooth transitions and animations where applicable.
+
+Keep data persistence consistent across memory.json, settings.json, dashboard.json, and chats.json.
+
+Make UI changes responsive so features work on desktop + mobile.
+
+Update the Info/Help Modal to reflect new features (memory deletion, goals, analytics, offline mode).
