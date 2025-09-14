@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Sun, Moon, BarChart3, MessageSquare, Trophy, Settings } from "lucide-react";
+import { Sun, Moon, BarChart3, MessageSquare, Trophy, Settings, TrendingUp } from "lucide-react";
 import { Button } from "./components/ui/button";
 import NewChatInterface from "./components/new-chat-interface";
 import NewDashboard from "./components/new-dashboard";
 import NewScores from "./components/new-scores";
+import AnalyticsDashboard from "./components/analytics-dashboard";
 import SettingsModal from "./components/settings-modal";
 import { useSettings } from "./hooks/use-settings";
 
@@ -30,7 +31,7 @@ interface Stats {
   }>;
 }
 
-type Tab = 'chat' | 'dashboard' | 'scores';
+type Tab = 'chat' | 'dashboard' | 'scores' | 'analytics';
 
 export default function App() {
   console.log('App component rendering...');
@@ -104,6 +105,8 @@ export default function App() {
         return <NewDashboard stats={stats} />;
       case 'scores':
         return <NewScores stats={stats} />;
+      case 'analytics':
+        return <AnalyticsDashboard stats={stats} />;
       default:
         return <NewChatInterface onStatsUpdate={handleStatsUpdate} />;
     }
@@ -138,6 +141,7 @@ export default function App() {
               {[
                 { id: 'chat', icon: MessageSquare, label: 'Chat' },
                 { id: 'dashboard', icon: BarChart3, label: 'Dashboard' },
+                { id: 'analytics', icon: TrendingUp, label: 'Analytics' },
                 ...(showScores ? [{ id: 'scores', icon: Trophy, label: 'Scores' }] : []),
               ].map((item) => {
                 const Icon = item.icon;
@@ -263,6 +267,7 @@ export default function App() {
               {[
                 { id: 'chat', icon: '💬', label: 'Chat' },
                 { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+                { id: 'analytics', icon: '📈', label: 'Analytics' },
                 ...(showScores ? [{ id: 'scores', icon: '🏆', label: 'Scores' }] : []),
               ].map((item) => (
                 <button
