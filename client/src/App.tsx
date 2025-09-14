@@ -6,6 +6,8 @@ import NewDashboard from "./components/new-dashboard";
 import NewScores from "./components/new-scores";
 import AnalyticsDashboard from "./components/analytics-dashboard";
 import SettingsModal from "./components/settings-modal";
+// import { OfflineIndicator } from "./components/offline-indicator";
+// import { useOffline } from "./contexts/offline-context";
 import { useSettings } from "./hooks/use-settings";
 
 interface Stats {
@@ -42,6 +44,7 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const { data: settings, isLoading: settingsLoading } = useSettings();
+  // const { isOnline } = useOffline();
   const showScores = settings?.showScores ?? true; // Default to true while loading
 
   // Initialize theme and mobile detection
@@ -292,6 +295,9 @@ export default function App() {
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
         />
+        
+        {/* Offline Indicator */}
+        {/* <OfflineIndicator /> */}
       </div>
     </div>
   );
