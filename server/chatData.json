@@ -83,6 +83,18 @@
       "role": "assistant",
       "message": "Hey little!  High five!  Three days is awesome, keep that momentum going!  Let's crush those habits today.",
       "timestamp": "2025-09-14T18:03:44.160Z"
+    },
+    {
+      "id": "173a09f2-2a60-4efe-8c3f-8e95318fa87e",
+      "role": "user",
+      "message": "well hi",
+      "timestamp": "2025-09-14T19:01:10.011Z"
+    },
+    {
+      "id": "611e015b-f9a8-42bc-8ca6-50731252afba",
+      "role": "assistant",
+      "message": "Hi little! How's it going today?  What can I help you with?",
+      "timestamp": "2025-09-14T19:01:10.625Z"
     }
   ]
 }
