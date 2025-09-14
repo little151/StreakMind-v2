@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 const DATA_FILE = "./server/data.json";
 const CHAT_FILE = "./server/chatData.json";
 const MEMORY_FILE = "./server/memory.json";
+const SETTINGS_FILE = "./server/settings.json";
 
 // Data structure interface
 export interface LogEntry {
@@ -58,20 +59,104 @@ export interface Activity {
   visualizationType: 'heatmap' | 'bar' | 'progress' | 'pie';
 }
 
+export interface AppSettings {
+  showScores: boolean;
+  enabledPersonalities: {
+    therapist: boolean;
+    friend: boolean;
+    trainer: boolean;
+  };
+  theme: 'light' | 'dark' | 'system';
+  notifications: {
+    streakReminders: boolean;
+    dailyGoals: boolean;
+    weeklyReports: boolean;
+  };
+  preferences: {
+    defaultVisualization: 'heatmap' | 'bar' | 'progress' | 'pie';
+    timeFormat: '12h' | '24h';
+    startWeekOn: 'sunday' | 'monday';
+  };
+}
+
 export interface AppData {
   logs: LogEntry[];
   scores: Array<{ id: string; points: number; timestamp: string }>;
   visualizations: Record<string, any>;
   streaks: Record<string, number>;
   activities: Record<string, Activity>; // New: store activity metadata
-  settings: {
-    showScores: boolean;
-    enabledPersonalities: {
-      therapist: boolean;
-      friend: boolean;
-      trainer: boolean;
+}
+
+// Settings management functions
+export function loadSettings(): AppSettings {
+  try {
+    const data = JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf8"));
+    return {
+      showScores: data.showScores ?? true,
+      enabledPersonalities: data.enabledPersonalities ?? {
+        therapist: true,
+        friend: true,
+        trainer: true,
+      },
+      theme: data.theme ?? 'dark',
+      notifications: data.notifications ?? {
+        streakReminders: true,
+        dailyGoals: true,
+        weeklyReports: false,
+      },
+      preferences: data.preferences ?? {
+        defaultVisualization: 'heatmap',
+        timeFormat: '24h',
+        startWeekOn: 'monday',
+      }
     };
-  };
+  } catch {
+    // Return default settings if file doesn't exist
+    const defaultSettings: AppSettings = {
+      showScores: true,
+      enabledPersonalities: {
+        therapist: true,
+        friend: true,
+        trainer: true,
+      },
+      theme: 'dark',
+      notifications: {
+        streakReminders: true,
+        dailyGoals: true,
+        weeklyReports: false,
+      },
+      preferences: {
+        defaultVisualization: 'heatmap',
+        timeFormat: '24h',
+        startWeekOn: 'monday',
+      }
+    };
+    saveSettings(defaultSettings);
+    return defaultSettings;
+  }
+}
+
+export function saveSettings(settings: AppSettings): void {
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+}
+
+export function updateSettings(updates: Partial<AppSettings>): AppSettings {
+  const currentSettings = loadSettings();
+  const newSettings = { ...currentSettings, ...updates };
+  
+  // Deep merge for nested objects
+  if (updates.enabledPersonalities) {
+    newSettings.enabledPersonalities = { ...currentSettings.enabledPersonalities, ...updates.enabledPersonalities };
+  }
+  if (updates.notifications) {
+    newSettings.notifications = { ...currentSettings.notifications, ...updates.notifications };
+  }
+  if (updates.preferences) {
+    newSettings.preferences = { ...currentSettings.preferences, ...updates.preferences };
+  }
+  
+  saveSettings(newSettings);
+  return newSettings;
 }
 
 // Helper functions for data management
@@ -83,15 +168,7 @@ export function loadData(): AppData {
       scores: data.scores || [],
       visualizations: data.visualizations || {},
       streaks: data.streaks || {},
-      activities: data.activities || {},
-      settings: data.settings || {
-        showScores: true,
-        enabledPersonalities: {
-          therapist: true,
-          friend: true,
-          trainer: true,
-        }
-      }
+      activities: data.activities || {}
     };
   } catch {
     return { 
@@ -99,15 +176,7 @@ export function loadData(): AppData {
       scores: [], 
       visualizations: {}, 
       streaks: {},
-      activities: {},
-      settings: {
-        showScores: true,
-        enabledPersonalities: {
-          therapist: true,
-          friend: true,
-          trainer: true,
-        }
-      }
+      activities: {}
     };
   }
 }

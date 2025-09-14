@@ -21,11 +21,15 @@ import {
   saveMemory,
   updateMemoryFromMessage,
   getMemoryContext,
+  loadSettings,
+  saveSettings,
+  updateSettings,
   type LogEntry,
   type Activity,
   type AppData,
   type ChatMessage,
   type UserMemory,
+  type AppSettings,
 } from "./data-helpers";
 
 // Enhanced personality system functions
@@ -62,6 +66,7 @@ function detectPersonalityNeeded(message: string): 'therapist' | 'friend' | 'tra
 function buildEnhancedPrompt(
   mode: string, 
   data: AppData, 
+  settings: AppSettings,
   logEntry: any, 
   pointsAwarded: number, 
   streakUpdated: boolean,
@@ -79,7 +84,7 @@ function buildEnhancedPrompt(
   const baseContext = `Current user stats: ${Object.keys(data.streaks).length} active habits, highest streak: ${Math.max(...Object.values(data.streaks) as number[], 0)} days. ${memoryContext ? `Personal context: ${memoryContext}` : ''}`;
   
   // Filter enabled personalities
-  const enabledPersonalities = Object.entries(data.settings.enabledPersonalities)
+  const enabledPersonalities = Object.entries(settings.enabledPersonalities)
     .filter(([_, enabled]) => enabled)
     .map(([personality, _]) => personality);
   
@@ -205,7 +210,8 @@ export function createApiRouter(genai: any) {
         saveData(data);
         // Generate response for new activity creation
         const personalityMode = detectPersonalityNeeded(content);
-        const systemPrompt = buildEnhancedPrompt(personalityMode, data, null, 0, false, false);
+        const settings = loadSettings();
+        const systemPrompt = buildEnhancedPrompt(personalityMode, data, settings, null, 0, false, false);
         
         let activityReply = "";
         try {
@@ -276,7 +282,8 @@ export function createApiRouter(genai: any) {
       // Check if this is a general query or habit-related
       const isGeneral = isGeneralQuery(content);
       const personalityMode = isGeneral ? 'default' : detectPersonalityNeeded(content);
-      const systemPrompt = buildEnhancedPrompt(personalityMode, data, logEntry, pointsAwarded, streakUpdated, isGeneral);
+      const settings = loadSettings();
+      const systemPrompt = buildEnhancedPrompt(personalityMode, data, settings, logEntry, pointsAwarded, streakUpdated, isGeneral);
       
       // Handle CRUD commands
       const crudCommand = parseCRUDCommand(content);
@@ -415,7 +422,8 @@ export function createApiRouter(genai: any) {
         saveData(data);
         // Generate response for new activity creation
         const personalityMode = detectPersonalityNeeded(message);
-        const systemPrompt = buildEnhancedPrompt(personalityMode, data, null, 0, false, false);
+        const settings = loadSettings();
+        const systemPrompt = buildEnhancedPrompt(personalityMode, data, settings, null, 0, false, false);
         
         let activityReply = "";
         try {
@@ -475,7 +483,8 @@ export function createApiRouter(genai: any) {
       // Check if this is a general query or habit-related
       const isGeneral = isGeneralQuery(message);
       const personalityMode = isGeneral ? 'default' : detectPersonalityNeeded(message);
-      const systemPrompt = buildEnhancedPrompt(personalityMode, data, logEntry, pointsAwarded, streakUpdated, isGeneral);
+      const settings = loadSettings();
+      const systemPrompt = buildEnhancedPrompt(personalityMode, data, settings, logEntry, pointsAwarded, streakUpdated, isGeneral);
       
       // Handle CRUD commands
       const crudCommand = parseCRUDCommand(message);
@@ -568,7 +577,6 @@ export function createApiRouter(genai: any) {
         badges,
         logs,
         activities: data.activities,
-        settings: data.settings,
       });
     } catch (error) {
       console.error("Stats endpoint error:", error);
@@ -652,28 +660,63 @@ export function createApiRouter(genai: any) {
     }
   });
 
-  // -------------------- Settings Endpoint --------------------
+  // -------------------- Settings Endpoints --------------------
+  
+  // Get all settings
+  router.get("/settings", (req, res) => {
+    try {
+      const settings = loadSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Get settings error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Update settings (partial update)
   router.put("/settings", (req, res) => {
     try {
-      const { showScores, enabledPersonalities } = req.body;
-      
-      const data = loadData();
-      
-      if (showScores !== undefined) {
-        data.settings.showScores = showScores;
-      }
-      
-      if (enabledPersonalities) {
-        data.settings.enabledPersonalities = {
-          ...data.settings.enabledPersonalities,
-          ...enabledPersonalities
-        };
-      }
-      
-      saveData(data);
-      res.json({ message: "Settings updated successfully", settings: data.settings });
+      const updates = req.body;
+      const updatedSettings = updateSettings(updates);
+      res.json({ 
+        message: "Settings updated successfully", 
+        settings: updatedSettings 
+      });
     } catch (error) {
       console.error("Update settings error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Reset settings to defaults
+  router.post("/settings/reset", (req, res) => {
+    try {
+      const defaultSettings: AppSettings = {
+        showScores: true,
+        enabledPersonalities: {
+          therapist: true,
+          friend: true,
+          trainer: true,
+        },
+        theme: 'dark',
+        notifications: {
+          streakReminders: true,
+          dailyGoals: true,
+          weeklyReports: false,
+        },
+        preferences: {
+          defaultVisualization: 'heatmap',
+          timeFormat: '24h',
+          startWeekOn: 'monday',
+        }
+      };
+      saveSettings(defaultSettings);
+      res.json({ 
+        message: "Settings reset to defaults", 
+        settings: defaultSettings 
+      });
+    } catch (error) {
+      console.error("Reset settings error:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });

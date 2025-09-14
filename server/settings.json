@@ -1,0 +1,19 @@
+{
+  "showScores": false,
+  "enabledPersonalities": {
+    "therapist": true,
+    "friend": true,
+    "trainer": false
+  },
+  "theme": "system",
+  "notifications": {
+    "streakReminders": false,
+    "dailyGoals": true,
+    "weeklyReports": false
+  },
+  "preferences": {
+    "defaultVisualization": "heatmap",
+    "timeFormat": "12h",
+    "startWeekOn": "monday"
+  }
+}

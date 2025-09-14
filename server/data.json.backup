@@ -203,5 +203,13 @@
       "createdAt": "2025-09-14T15:49:46.380Z",
       "visualizationType": "bar"
     }
+  },
+  "settings": {
+    "showScores": false,
+    "enabledPersonalities": {
+      "therapist": true,
+      "friend": true,
+      "trainer": true
+    }
   }
 }

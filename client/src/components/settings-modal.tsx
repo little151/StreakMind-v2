@@ -1,36 +1,31 @@
-import React, { useState } from "react";
-import { X, Settings, Eye, EyeOff, Brain, Heart, Dumbbell, Users } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Settings, Eye, EyeOff, Brain, Heart, Dumbbell, Users, Bell, BellOff, RefreshCw } from "lucide-react";
+import { useSettings, useUpdateSettings, useResetSettings } from "../hooks/use-settings";
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  showScores: boolean;
-  onToggleScores: (show: boolean) => void;
-  enabledPersonalities?: {
-    therapist: boolean;
-    friend: boolean;
-    trainer: boolean;
-  };
-  onUpdatePersonalities?: (personalities: {
-    therapist: boolean;
-    friend: boolean;
-    trainer: boolean;
-  }) => void;
 }
 
 export default function SettingsModal({ 
   isOpen, 
-  onClose, 
-  showScores, 
-  onToggleScores,
-  enabledPersonalities = {
+  onClose
+}: SettingsModalProps) {
+  const { data: settings, isLoading } = useSettings();
+  const updateSettings = useUpdateSettings();
+  const resetSettings = useResetSettings();
+
+  const [localPersonalities, setLocalPersonalities] = useState({
     therapist: true,
     friend: true,
     trainer: true,
-  },
-  onUpdatePersonalities
-}: SettingsModalProps) {
-  const [localPersonalities, setLocalPersonalities] = useState(enabledPersonalities);
+  });
+
+  useEffect(() => {
+    if (settings?.enabledPersonalities) {
+      setLocalPersonalities(settings.enabledPersonalities);
+    }
+  }, [settings]);
   if (!isOpen) return null;
 
   return (
@@ -53,33 +48,44 @@ export default function SettingsModal({
         </div>
 
         <div className="space-y-6 overflow-y-auto">
-          {/* Scores Visibility Toggle */}
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                {showScores ? (
-                  <Eye className="h-4 w-4 text-accent" />
-                ) : (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
-                )}
-                <span className="font-medium text-foreground">Show Scores & Gamification</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {showScores 
-                  ? "Points, badges, and detailed progress tracking are visible" 
-                  : "Focus mode - only basic habit tracking without points"}
-              </p>
+          {/* Loading State */}
+          {isLoading && (
+            <div className="text-center py-8">
+              <div className="text-muted-foreground">Loading settings...</div>
             </div>
-            <button
-              onClick={() => onToggleScores(!showScores)}
-              className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
-                showScores 
+          )}
+
+          {/* Settings Content */}
+          {settings && !isLoading && (
+            <>
+              {/* Scores Visibility Toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    {settings.showScores ? (
+                      <Eye className="h-4 w-4 text-accent" />
+                    ) : (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className="font-medium text-foreground">Show Scores & Gamification</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {settings.showScores 
+                      ? "Points, badges, and detailed progress tracking are visible" 
+                      : "Focus mode - only basic habit tracking without points"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => updateSettings.mutate({ showScores: !settings.showScores })}
+                  disabled={updateSettings.isPending}
+                  className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+                settings.showScores 
                   ? "bg-accent text-accent-foreground hover:bg-accent/90" 
                   : "border border-border text-foreground hover:bg-muted"
               }`}
               data-testid="toggle-scores-visibility"
             >
-              {showScores ? "ON" : "OFF"}
+              {updateSettings.isPending ? "..." : (settings.showScores ? "ON" : "OFF")}
             </button>
           </div>
 
@@ -113,7 +119,7 @@ export default function SettingsModal({
                           [key]: e.target.checked
                         };
                         setLocalPersonalities(updated);
-                        onUpdatePersonalities?.(updated);
+                        updateSettings.mutate({ enabledPersonalities: updated });
                       }}
                       className="sr-only peer"
                     />
@@ -135,6 +141,8 @@ export default function SettingsModal({
               <p>• <strong className="text-foreground">General chat:</strong> Ask me anything! I can help with non-tracking questions too</p>
             </div>
           </div>
+            </>
+          )}
         </div>
 
         <div className="mt-6 flex justify-end">
