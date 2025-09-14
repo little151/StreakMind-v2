@@ -44,3 +44,15 @@ export function useClearMemory() {
     },
   });
 }
+
+export function useRemoveMemoryItem() {
+  return useMutation({
+    mutationFn: async ({ category, item }: { category: string; item: string }) => {
+      const response = await apiRequest('POST', '/api/memory/remove-item', { category, item });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/memory'] });
+    },
+  });
+}

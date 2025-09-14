@@ -1,4 +1,6 @@
 // server/routes.ts
+import fs from "fs";
+import path from "path";
 import { Router } from "express";
 import { randomUUID } from "crypto";
 import {
@@ -721,6 +723,45 @@ export function createApiRouter(genai: any) {
     }
   });
 
+  // -------------------- Dashboard Layout Endpoints --------------------
+  
+  // Get dashboard layout
+  router.get("/dashboard/layout", (req, res) => {
+    try {
+      const layoutFile = path.join(__dirname, 'dashboard.json');
+      
+      if (!fs.existsSync(layoutFile)) {
+        return res.json({ activityOrder: [] });
+      }
+      
+      const layout = JSON.parse(fs.readFileSync(layoutFile, 'utf8'));
+      res.json(layout);
+    } catch (error) {
+      console.error("Get dashboard layout error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Save dashboard layout
+  router.post("/dashboard/layout", (req, res) => {
+    try {
+      const { activityOrder } = req.body;
+      
+      if (!Array.isArray(activityOrder)) {
+        return res.status(400).json({ error: "activityOrder must be an array" });
+      }
+      
+      const layoutFile = path.join(__dirname, 'dashboard.json');
+      const layout = { activityOrder, updatedAt: new Date().toISOString() };
+      
+      fs.writeFileSync(layoutFile, JSON.stringify(layout, null, 2));
+      res.json({ message: "Dashboard layout saved successfully", layout });
+    } catch (error) {
+      console.error("Save dashboard layout error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // -------------------- Memory Management Endpoints --------------------
   
   // Get memory data
@@ -730,6 +771,52 @@ export function createApiRouter(genai: any) {
       res.json(memory);
     } catch (error) {
       console.error("Get memory error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Remove individual memory item
+  router.post("/memory/remove-item", (req, res) => {
+    try {
+      const { category, item } = req.body || {};
+      
+      if (!category || !item) {
+        return res.status(400).json({ error: "category and item are required" });
+      }
+      
+      const memory = loadMemory();
+      
+      // Remove specific item from the appropriate array
+      switch (category) {
+        case 'goals':
+          memory.personalContext.goals = memory.personalContext.goals.filter(goal => goal !== item);
+          break;
+        case 'challenges':
+          memory.personalContext.challenges = memory.personalContext.challenges.filter(challenge => challenge !== item);
+          break;
+        case 'achievements':
+          memory.personalContext.achievements = memory.personalContext.achievements.filter(achievement => achievement !== item);
+          break;
+        case 'commonTopics':
+          memory.conversationContext.commonTopics = memory.conversationContext.commonTopics.filter(topic => topic !== item);
+          break;
+        case 'strugglingWith':
+          memory.conversationContext.strugglingWith = memory.conversationContext.strugglingWith.filter(struggle => struggle !== item);
+          break;
+        case 'celebrating':
+          memory.conversationContext.celebrating = memory.conversationContext.celebrating.filter(celebration => celebration !== item);
+          break;
+        case 'preferredActivities':
+          memory.preferences.preferredActivities = memory.preferences.preferredActivities.filter(activity => activity !== item);
+          break;
+        default:
+          return res.status(400).json({ error: "Invalid category" });
+      }
+      
+      saveMemory(memory);
+      res.json({ message: "Memory item removed successfully", memory });
+    } catch (error) {
+      console.error("Remove memory item error:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });

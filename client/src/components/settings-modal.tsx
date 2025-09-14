@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { X, Settings, Eye, EyeOff, Brain, Heart, Dumbbell, Users, Bell, BellOff, RefreshCw, Trash2, Database } from "lucide-react";
+import { X, Settings, Eye, EyeOff, Brain, Heart, Dumbbell, Users, Bell, BellOff, RefreshCw, Trash2, Database, ChevronDown, ChevronRight } from "lucide-react";
 import { useSettings, useUpdateSettings, useResetSettings } from "../hooks/use-settings";
-import { useMemory, useClearMemory } from "../hooks/use-memory";
+import { useMemory, useClearMemory, useRemoveMemoryItem } from "../hooks/use-memory";
 import { Button } from "./ui/button";
 
 interface SettingsModalProps {
@@ -18,6 +18,7 @@ export default function SettingsModal({
   const resetSettings = useResetSettings();
   const { data: memory, isLoading: memoryLoading } = useMemory();
   const clearMemory = useClearMemory();
+  const removeMemoryItem = useRemoveMemoryItem();
 
   const [localPersonalities, setLocalPersonalities] = useState({
     therapist: true,
@@ -25,11 +26,21 @@ export default function SettingsModal({
     trainer: true,
   });
 
+  const [expandedMemorySection, setExpandedMemorySection] = useState<string | null>(null);
+
   useEffect(() => {
     if (settings?.enabledPersonalities) {
       setLocalPersonalities(settings.enabledPersonalities);
     }
   }, [settings]);
+
+  const handleDeleteMemoryItem = (category: string, item: string) => {
+    removeMemoryItem.mutate({ category, item });
+  };
+
+  const toggleMemorySection = (section: string) => {
+    setExpandedMemorySection(expandedMemorySection === section ? null : section);
+  };
   if (!isOpen) return null;
 
   return (
@@ -160,40 +171,198 @@ export default function SettingsModal({
 
             {memory && !memoryLoading && (
               <div className="space-y-4">
-                {/* Memory Summary */}
-                <div className="bg-muted/30 rounded-lg p-3 space-y-2 text-sm">
+                {/* Enhanced Memory Viewer */}
+                <div className="space-y-3">
+                  {/* Name */}
                   {memory.name && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Name:</span>
-                      <span className="font-medium">{memory.name}</span>
+                    <div className="bg-muted/30 rounded-lg p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Name</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => clearMemory.mutate(['name'])}
+                          disabled={clearMemory.isPending}
+                          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <div className="text-sm text-foreground mt-1">{memory.name}</div>
                     </div>
                   )}
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Goals:</span>
-                    <span className="font-medium">{memory.personalContext.goals.length}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Challenges:</span>
-                    <span className="font-medium">{memory.personalContext.challenges.length}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Achievements:</span>
-                    <span className="font-medium">{memory.personalContext.achievements.length}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Preferred Activities:</span>
-                    <span className="font-medium">{memory.preferences.preferredActivities.length}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Last Updated:</span>
-                    <span className="font-medium">
-                      {new Date(memory.updatedAt).toLocaleDateString()}
-                    </span>
+
+                  {/* Personal Context */}
+                  {(['goals', 'challenges', 'achievements'] as const).map((category) => {
+                    const items = memory.personalContext[category];
+                    const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
+                    
+                    if (items.length === 0) return null;
+                    
+                    return (
+                      <div key={category} className="bg-muted/30 rounded-lg p-3">
+                        <button
+                          onClick={() => toggleMemorySection(category)}
+                          className="flex justify-between items-center w-full text-left"
+                        >
+                          <div className="flex items-center gap-2">
+                            {expandedMemorySection === category ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <span className="text-sm font-medium">{categoryLabel}</span>
+                            <span className="text-xs text-muted-foreground">({items.length})</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              clearMemory.mutate([category]);
+                            }}
+                            disabled={clearMemory.isPending}
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </button>
+                        
+                        {expandedMemorySection === category && (
+                          <div className="mt-2 space-y-1">
+                            {items.map((item, index) => (
+                              <div key={index} className="flex justify-between items-center bg-background/50 rounded px-2 py-1">
+                                <span className="text-sm text-foreground">{item}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteMemoryItem(category, item)}
+                                  disabled={clearMemory.isPending}
+                                  className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Conversation Context */}
+                  {(['commonTopics', 'strugglingWith', 'celebrating'] as const).map((category) => {
+                    const items = memory.conversationContext[category];
+                    const categoryLabel = category === 'commonTopics' ? 'Common Topics' : 
+                                         category === 'strugglingWith' ? 'Struggling With' : 'Celebrating';
+                    
+                    if (items.length === 0) return null;
+                    
+                    return (
+                      <div key={category} className="bg-muted/30 rounded-lg p-3">
+                        <button
+                          onClick={() => toggleMemorySection(category)}
+                          className="flex justify-between items-center w-full text-left"
+                        >
+                          <div className="flex items-center gap-2">
+                            {expandedMemorySection === category ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <span className="text-sm font-medium">{categoryLabel}</span>
+                            <span className="text-xs text-muted-foreground">({items.length})</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              clearMemory.mutate([category]);
+                            }}
+                            disabled={clearMemory.isPending}
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </button>
+                        
+                        {expandedMemorySection === category && (
+                          <div className="mt-2 space-y-1">
+                            {items.map((item, index) => (
+                              <div key={index} className="flex justify-between items-center bg-background/50 rounded px-2 py-1">
+                                <span className="text-sm text-foreground">{item}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteMemoryItem(category, item)}
+                                  disabled={clearMemory.isPending}
+                                  className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Preferred Activities */}
+                  {memory.preferences.preferredActivities.length > 0 && (
+                    <div className="bg-muted/30 rounded-lg p-3">
+                      <button
+                        onClick={() => toggleMemorySection('preferredActivities')}
+                        className="flex justify-between items-center w-full text-left"
+                      >
+                        <div className="flex items-center gap-2">
+                          {expandedMemorySection === 'preferredActivities' ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                          <span className="text-sm font-medium">Preferred Activities</span>
+                          <span className="text-xs text-muted-foreground">({memory.preferences.preferredActivities.length})</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearMemory.mutate(['preferredActivities']);
+                          }}
+                          disabled={clearMemory.isPending}
+                          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </button>
+                      
+                      {expandedMemorySection === 'preferredActivities' && (
+                        <div className="mt-2 space-y-1">
+                          {memory.preferences.preferredActivities.map((item, index) => (
+                            <div key={index} className="flex justify-between items-center bg-background/50 rounded px-2 py-1">
+                              <span className="text-sm text-foreground">{item}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteMemoryItem('preferredActivities', item)}
+                                disabled={clearMemory.isPending}
+                                className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Last Updated */}
+                  <div className="text-xs text-muted-foreground text-center">
+                    Last updated: {new Date(memory.updatedAt).toLocaleDateString()}
                   </div>
                 </div>
 

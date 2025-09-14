@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TrendingUp } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
+import { useSettings } from "../hooks/use-settings";
 import ActivityTile from "./activity-tile";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -37,6 +38,7 @@ interface NewDashboardProps {
 }
 
 export default function NewDashboard({ stats }: NewDashboardProps) {
+  const { data: settings } = useSettings();
   const [editingActivity, setEditingActivity] = useState<string | null>(null);
   const [newActivityName, setNewActivityName] = useState("");
   const [selectedVisualization, setSelectedVisualization] = useState<'heatmap' | 'bar' | 'progress' | 'pie'>('heatmap');
@@ -44,6 +46,25 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [createActivityName, setCreateActivityName] = useState("");
   const [createVisualization, setCreateVisualization] = useState<'heatmap' | 'bar' | 'progress' | 'pie'>('heatmap');
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [activityOrder, setActivityOrder] = useState<string[]>([]);
+
+  // Load saved dashboard layout on mount
+  useEffect(() => {
+    const loadDashboardLayout = async () => {
+      try {
+        const response = await apiRequest('GET', '/api/dashboard/layout');
+        const layout = await response.json();
+        if (layout.activityOrder?.length > 0) {
+          setActivityOrder(layout.activityOrder);
+        }
+      } catch (error) {
+        console.error('Failed to load dashboard layout:', error);
+      }
+    };
+
+    loadDashboardLayout();
+  }, []);
 
   if (!stats) {
     return (
@@ -139,13 +160,56 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
   };
 
   // Get unique activities and their data
-  const activities = Object.keys(stats.activities || {});
+  const baseActivities = Object.keys(stats.activities || {});
+  
+  // Use saved activity order or default to current order
+  const activities = activityOrder.length > 0 ? 
+    activityOrder.filter(activity => baseActivities.includes(activity)) : 
+    baseActivities;
   
   // Calculate points per activity
   const getActivityPoints = (activity: string) => {
     return stats.logs
       .filter(log => log.activity === activity)
       .reduce((total, log) => total + log.points, 0);
+  };
+
+  // Drag and drop handlers
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (draggedIndex === null) return;
+    
+    const newOrder = [...activities];
+    const draggedItem = newOrder[draggedIndex];
+    
+    // Remove the dragged item
+    newOrder.splice(draggedIndex, 1);
+    
+    // Insert it at the new position
+    newOrder.splice(dropIndex, 0, draggedItem);
+    
+    setActivityOrder(newOrder);
+    setDraggedIndex(null);
+    
+    // Save the new layout
+    saveDashboardLayout(newOrder);
+  };
+
+  const saveDashboardLayout = async (order: string[]) => {
+    try {
+      await apiRequest('POST', '/api/dashboard/layout', { activityOrder: order });
+    } catch (error) {
+      console.error('Failed to save dashboard layout:', error);
+    }
   };
 
   return (
@@ -164,10 +228,12 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
                 <Button className="button-scale" data-testid="button-create-activity">Create Activity</Button>
               </DialogTrigger>
             </Dialog>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-accent">{stats.totalPoints}</div>
-              <div className="text-sm text-muted-foreground">Total Points</div>
-            </div>
+            {settings?.showScores && (
+              <div className="text-right">
+                <div className="text-2xl font-bold text-accent">{stats.totalPoints}</div>
+                <div className="text-sm text-muted-foreground">Total Points</div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -175,17 +241,28 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
         {activities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6 stagger-children">
             {activities.map((activity, index) => (
-              <ActivityTile
+              <div
                 key={activity}
-                activity={activity}
-                streak={stats.streaks[activity] || 0}
-                recentLogs={stats.logs}
-                totalPoints={getActivityPoints(activity)}
-                visualization={stats.activities[activity]?.visualizationType || 'heatmap'}
-                onEdit={handleEditActivity}
-                onDelete={handleDeleteActivity}
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, index)}
+                className={`cursor-move transition-all duration-200 ${
+                  draggedIndex === index ? 'opacity-50 scale-95' : ''
+                }`}
                 style={{ animationDelay: `${index * 50}ms` }}
-              />
+              >
+                <ActivityTile
+                  activity={activity}
+                  streak={stats.streaks[activity] || 0}
+                  recentLogs={stats.logs}
+                  totalPoints={getActivityPoints(activity)}
+                  visualization={stats.activities[activity]?.visualizationType || 'heatmap'}
+                  showScores={settings?.showScores === true}
+                  onEdit={handleEditActivity}
+                  onDelete={handleDeleteActivity}
+                />
+              </div>
             ))}
           </div>
         ) : (

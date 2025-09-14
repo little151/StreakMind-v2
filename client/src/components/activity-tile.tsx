@@ -16,6 +16,7 @@ interface ActivityTileProps extends React.HTMLAttributes<HTMLDivElement> {
   totalPoints: number;
   visualization: 'heatmap' | 'bar' | 'progress' | 'pie';
   customPoints?: number;
+  showScores?: boolean;
   onEdit?: (activity: string) => void;
   onDelete?: (activity: string) => void;
 }
@@ -27,6 +28,7 @@ export default function ActivityTile({
   totalPoints,
   visualization,
   customPoints,
+  showScores = true,
   onEdit,
   onDelete,
   style,
@@ -210,7 +212,7 @@ export default function ActivityTile({
 
   return (
     <div 
-      className={`bg-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-all duration-300 hover:border-accent/20 card-hover group activity-tile-enter hover:scale-[1.02] ${className || ''}`}
+      className={`bg-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-all duration-300 hover:border-accent/20 card-hover group hover:scale-[1.02] ${className || ''}`}
       style={style}
       data-testid={`tile-${activity}`}
       onMouseEnter={() => setShowActions(true)}
@@ -258,19 +260,21 @@ export default function ActivityTile({
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className={`grid ${showScores ? 'grid-cols-2' : 'grid-cols-1'} gap-3 mb-3`}>
         <div className="text-center">
           <div className={`text-lg font-bold ${getStreakColor(streak)}`}>
             {streak}
           </div>
           <div className="text-xs text-muted-foreground">Day Streak</div>
         </div>
-        <div className="text-center">
-          <div className="text-lg font-bold text-accent">
-            {totalPoints}
+        {showScores && (
+          <div className="text-center">
+            <div className="text-lg font-bold text-accent">
+              {totalPoints}
+            </div>
+            <div className="text-xs text-muted-foreground">Points</div>
           </div>
-          <div className="text-xs text-muted-foreground">Points</div>
-        </div>
+        )}
       </div>
 
       {/* Visualization */}
