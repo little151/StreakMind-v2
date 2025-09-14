@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { X, Settings, Eye, EyeOff, Brain, Heart, Dumbbell, Users, Bell, BellOff, RefreshCw } from "lucide-react";
+import { X, Settings, Eye, EyeOff, Brain, Heart, Dumbbell, Users, Bell, BellOff, RefreshCw, Trash2, Database } from "lucide-react";
 import { useSettings, useUpdateSettings, useResetSettings } from "../hooks/use-settings";
+import { useMemory, useClearMemory } from "../hooks/use-memory";
+import { Button } from "./ui/button";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -14,6 +16,8 @@ export default function SettingsModal({
   const { data: settings, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
   const resetSettings = useResetSettings();
+  const { data: memory, isLoading: memoryLoading } = useMemory();
+  const clearMemory = useClearMemory();
 
   const [localPersonalities, setLocalPersonalities] = useState({
     therapist: true,
@@ -136,6 +140,111 @@ export default function SettingsModal({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Memory Management */}
+          <div className="border-t border-border pt-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Database className="h-4 w-4 text-accent" />
+              <h4 className="font-medium text-foreground">Memory Management</h4>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              View and manage what StreakMind remembers about you
+            </p>
+
+            {memoryLoading && (
+              <div className="text-center py-4">
+                <div className="text-sm text-muted-foreground">Loading memory...</div>
+              </div>
+            )}
+
+            {memory && !memoryLoading && (
+              <div className="space-y-4">
+                {/* Memory Summary */}
+                <div className="bg-muted/30 rounded-lg p-3 space-y-2 text-sm">
+                  {memory.name && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Name:</span>
+                      <span className="font-medium">{memory.name}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Goals:</span>
+                    <span className="font-medium">{memory.personalContext.goals.length}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Challenges:</span>
+                    <span className="font-medium">{memory.personalContext.challenges.length}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Achievements:</span>
+                    <span className="font-medium">{memory.personalContext.achievements.length}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Preferred Activities:</span>
+                    <span className="font-medium">{memory.preferences.preferredActivities.length}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Last Updated:</span>
+                    <span className="font-medium">
+                      {new Date(memory.updatedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Memory Actions */}
+                <div className="grid grid-cols-1 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => clearMemory.mutate(['name'])}
+                    disabled={clearMemory.isPending || !memory.name}
+                    className="justify-start text-sm"
+                  >
+                    <Trash2 className="h-3 w-3 mr-2" />
+                    Clear Name
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => clearMemory.mutate(['goals', 'challenges', 'achievements'])}
+                    disabled={clearMemory.isPending}
+                    className="justify-start text-sm"
+                  >
+                    <Trash2 className="h-3 w-3 mr-2" />
+                    Clear Personal Context
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => clearMemory.mutate(['commonTopics', 'strugglingWith', 'celebrating'])}
+                    disabled={clearMemory.isPending}
+                    className="justify-start text-sm"
+                  >
+                    <Trash2 className="h-3 w-3 mr-2" />
+                    Clear Conversation History
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => clearMemory.mutate(['all'])}
+                    disabled={clearMemory.isPending}
+                    className="justify-start text-sm text-destructive border-destructive/20 hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-3 w-3 mr-2" />
+                    {clearMemory.isPending ? "Clearing..." : "Clear All Memory"}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Help Section */}

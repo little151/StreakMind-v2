@@ -721,6 +721,84 @@ export function createApiRouter(genai: any) {
     }
   });
 
+  // -------------------- Memory Management Endpoints --------------------
+  
+  // Get memory data
+  router.get("/memory", (req, res) => {
+    try {
+      const memory = loadMemory();
+      res.json(memory);
+    } catch (error) {
+      console.error("Get memory error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Clear specific memory fields
+  router.post("/memory/clear", (req, res) => {
+    try {
+      const { fields } = req.body || {}; // Array of field paths to clear
+      
+      if (!fields || !Array.isArray(fields)) {
+        return res.status(400).json({ error: "fields array is required" });
+      }
+      
+      const memory = loadMemory();
+      
+      fields.forEach((field: string) => {
+        switch (field) {
+          case 'name':
+            delete memory.name;
+            break;
+          case 'goals':
+            memory.personalContext.goals = [];
+            break;
+          case 'challenges':
+            memory.personalContext.challenges = [];
+            break;
+          case 'achievements':
+            memory.personalContext.achievements = [];
+            break;
+          case 'commonTopics':
+            memory.conversationContext.commonTopics = [];
+            break;
+          case 'strugglingWith':
+            memory.conversationContext.strugglingWith = [];
+            break;
+          case 'celebrating':
+            memory.conversationContext.celebrating = [];
+            break;
+          case 'preferredActivities':
+            memory.preferences.preferredActivities = [];
+            break;
+          case 'all':
+            // Reset all memory except timestamps and id
+            memory.name = undefined;
+            memory.preferences.preferredActivities = [];
+            memory.personalContext = {
+              goals: [],
+              challenges: [],
+              achievements: [],
+              recurringPatterns: []
+            };
+            memory.conversationContext = {
+              lastSession: memory.conversationContext.lastSession,
+              commonTopics: [],
+              strugglingWith: [],
+              celebrating: []
+            };
+            break;
+        }
+      });
+      
+      saveMemory(memory);
+      res.json({ message: "Memory cleared successfully", memory });
+    } catch (error) {
+      console.error("Clear memory error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // -------------------- Health Endpoint --------------------
   router.get("/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });

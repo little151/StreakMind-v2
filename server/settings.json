@@ -1,8 +1,8 @@
 {
-  "showScores": true,
+  "showScores": false,
   "enabledPersonalities": {
-    "therapist": false,
-    "friend": false,
+    "therapist": true,
+    "friend": true,
     "trainer": true
   },
   "theme": "system",
