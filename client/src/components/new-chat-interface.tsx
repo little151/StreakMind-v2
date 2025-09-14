@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Send, Bot, User, Info } from "lucide-react";
+import { Send, Bot, User, Info, Trash2, CheckSquare, Square } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -27,7 +27,10 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -42,15 +45,27 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
     scrollToBottom();
   }, [messages]);
 
+  // Maintain input focus
+  useEffect(() => {
+    if (!isLoading && !isMultiSelectMode) {
+      inputRef.current?.focus();
+    }
+  }, [isLoading, isMultiSelectMode]);
+
   const loadMessages = async () => {
     try {
       const response = await fetch("/api/messages");
       if (response.ok) {
         const data = await response.json();
+        console.log("Loaded messages:", data);
         setMessages(data);
+      } else {
+        console.error("Failed to load messages:", response.status, response.statusText);
+        const errorBody = await response.text();
+        console.error("Error body:", errorBody);
       }
     } catch (error) {
-      console.error("Error loading messages:", error);
+      console.error("Error loading messages:", error instanceof Error ? error.message : error);
     }
   };
 
@@ -59,6 +74,11 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
 
     setInputValue("");
     setIsLoading(true);
+
+    // Maintain cursor focus after sending
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
 
     try {
       const response = await fetch("/api/messages", {
@@ -91,6 +111,10 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      // Ensure focus returns to input
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   };
 
@@ -116,10 +140,54 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
       
       if (response.ok) {
         setMessages([]);
+        setSelectedMessages(new Set());
+        setIsMultiSelectMode(false);
       }
     } catch (error) {
       console.error("Error clearing messages:", error);
     }
+  };
+
+  const toggleSelectMessage = (messageId: string) => {
+    const newSelected = new Set(selectedMessages);
+    if (newSelected.has(messageId)) {
+      newSelected.delete(messageId);
+    } else {
+      newSelected.add(messageId);
+    }
+    setSelectedMessages(newSelected);
+  };
+
+  const selectAllMessages = () => {
+    if (selectedMessages.size === messages.length) {
+      setSelectedMessages(new Set());
+    } else {
+      setSelectedMessages(new Set(messages.map(m => m.id)));
+    }
+  };
+
+  const deleteSelectedMessages = async () => {
+    if (selectedMessages.size === 0) return;
+
+    try {
+      // Delete messages in batch
+      await Promise.all(
+        Array.from(selectedMessages).map(messageId =>
+          fetch(`/api/messages/${messageId}`, { method: 'DELETE' })
+        )
+      );
+      
+      await loadMessages();
+      setSelectedMessages(new Set());
+      setIsMultiSelectMode(false);
+    } catch (error) {
+      console.error("Error deleting selected messages:", error);
+    }
+  };
+
+  const toggleMultiSelectMode = () => {
+    setIsMultiSelectMode(!isMultiSelectMode);
+    setSelectedMessages(new Set());
   };
 
   const refreshStats = async () => {
@@ -263,24 +331,83 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
       
       {/* Header with Info Button */}
       <div className="flex items-center justify-between p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground">Chat</h2>
-        <div className="flex items-center gap-2">
-          {messages.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAllMessages}
-              className="text-muted-foreground hover:text-destructive"
-              title="Clear all messages"
-            >
-              Clear All
-            </Button>
+        <h2 className="text-lg font-semibold text-foreground">
+          Chat {isMultiSelectMode && selectedMessages.size > 0 && (
+            <span className="text-sm text-muted-foreground ml-2">
+              ({selectedMessages.size} selected)
+            </span>
           )}
+        </h2>
+        <div className="flex items-center gap-2">
+          {messages.length > 0 && !isMultiSelectMode && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleMultiSelectMode}
+                className="text-muted-foreground hover:text-foreground"
+                title="Select messages"
+                data-testid="button-multi-select"
+              >
+                <CheckSquare className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAllMessages}
+                className="text-muted-foreground hover:text-destructive"
+                title="Clear all messages"
+                data-testid="button-clear-all"
+              >
+                Clear All
+              </Button>
+            </>
+          )}
+          
+          {isMultiSelectMode && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={selectAllMessages}
+                className="text-muted-foreground hover:text-foreground"
+                title="Select all messages"
+                data-testid="button-select-all"
+              >
+                {selectedMessages.size === messages.length ? "Deselect All" : "Select All"}
+              </Button>
+              {selectedMessages.size > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={deleteSelectedMessages}
+                  className="text-muted-foreground hover:text-destructive"
+                  title="Delete selected messages"
+                  data-testid="button-delete-selected"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete ({selectedMessages.size})
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleMultiSelectMode}
+                className="text-muted-foreground hover:text-foreground"
+                title="Exit selection mode"
+                data-testid="button-exit-select"
+              >
+                Cancel
+              </Button>
+            </>
+          )}
+          
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowInfoModal(true)}
             className="text-muted-foreground hover:text-foreground"
+            data-testid="button-info"
           >
             <Info className="h-4 w-4" />
           </Button>
@@ -301,9 +428,21 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
           messages.map((message) => (
             <div
               key={message.id}
-              className={`msg ${message.role === 'user' ? 'user' : 'bot'} animate-in slide-in-from-bottom-2 duration-300`}
+              className={`msg ${message.role === 'user' ? 'user' : 'bot'} animate-in slide-in-from-bottom-2 duration-300 ${isMultiSelectMode ? 'cursor-pointer' : ''}`}
+              onClick={() => isMultiSelectMode && toggleSelectMessage(message.id)}
             >
-              <div className="flex items-start gap-3 max-w-[80%] group">
+              <div className={`flex items-start gap-3 max-w-[80%] group ${selectedMessages.has(message.id) ? 'bg-accent/10 rounded-lg p-2' : ''}`}>
+                {/* Selection checkbox */}
+                {isMultiSelectMode && (
+                  <div className="flex items-center pt-1">
+                    {selectedMessages.has(message.id) ? (
+                      <CheckSquare className="h-4 w-4 text-accent" />
+                    ) : (
+                      <Square className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                )}
+                
                 {message.role === 'assistant' && (
                   <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
                     <Bot className="h-4 w-4 text-muted-foreground" />
@@ -311,13 +450,19 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
                 )}
                 <div className="bubble relative">
                   {message.message}
-                  <button
-                    onClick={() => deleteMessage(message.id)}
-                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
-                    title="Delete message"
-                  >
-                    ×
-                  </button>
+                  {!isMultiSelectMode && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteMessage(message.id);
+                      }}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+                      title="Delete message"
+                      data-testid={`button-delete-message-${message.id}`}
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
                 {message.role === 'user' && (
                   <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
@@ -353,6 +498,7 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
       <div className="border-t border-border p-4">
         <div className="flex gap-3 max-w-4xl mx-auto">
           <Input
+            ref={inputRef}
             type="text"
             placeholder="Type your habit update... (e.g., 'Did 30 min meditation')"
             value={inputValue}
@@ -360,6 +506,8 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
             onKeyPress={handleKeyPress}
             disabled={isLoading}
             className="flex-1"
+            data-testid="input-chat-message"
+            autoFocus
           />
           <Button
             onClick={sendMessage}

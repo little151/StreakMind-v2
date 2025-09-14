@@ -1,0 +1,23 @@
+{
+  "id": "3d5637b9-e686-4d76-9643-64ee853f379b",
+  "preferences": {
+    "preferredActivities": [],
+    "timeOfDay": "adaptive",
+    "personalityPreference": "adaptive",
+    "motivationStyle": "encouraging"
+  },
+  "personalContext": {
+    "goals": [],
+    "challenges": [],
+    "achievements": [],
+    "recurringPatterns": []
+  },
+  "conversationContext": {
+    "lastSession": "2025-09-14T15:44:24.124Z",
+    "commonTopics": [],
+    "strugglingWith": [],
+    "celebrating": []
+  },
+  "createdAt": "2025-09-14T15:44:24.124Z",
+  "updatedAt": "2025-09-14T15:44:24.125Z"
+}

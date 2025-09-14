@@ -1,3 +1,16 @@
 {
-  "messages": []
+  "messages": [
+    {
+      "id": "3e4619c6-8294-42da-9b4f-11dd59f12144",
+      "role": "user",
+      "message": "Test message for multi-select functionality",
+      "timestamp": "2025-09-14T15:44:24.123Z"
+    },
+    {
+      "id": "a3531c88-15e9-4512-ad1f-e2060638d147",
+      "role": "assistant",
+      "message": "Okay, I'm ready for your multi-select question!  Let's see what you've got.  I'll do my best to understand your question and give you helpful options to choose from.  Ask away!",
+      "timestamp": "2025-09-14T15:44:24.901Z"
+    }
+  ]
 }
