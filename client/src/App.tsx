@@ -5,6 +5,7 @@ import NewChatInterface from "./components/new-chat-interface";
 import NewDashboard from "./components/new-dashboard";
 import NewScores from "./components/new-scores";
 import SettingsModal from "./components/settings-modal";
+import { useSettings } from "./hooks/use-settings";
 
 interface Stats {
   totalPoints: number;
@@ -39,7 +40,8 @@ export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [isMobile, setIsMobile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showScores, setShowScores] = useState(true);
+  const { data: settings, isLoading: settingsLoading } = useSettings();
+  const showScores = settings?.showScores ?? true; // Default to true while loading
 
   // Initialize theme and mobile detection
   useEffect(() => {
@@ -52,11 +54,7 @@ export default function App() {
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
     
-    // Load scores visibility setting
-    const savedShowScores = localStorage.getItem('showScores');
-    if (savedShowScores !== null) {
-      setShowScores(JSON.parse(savedShowScores));
-    }
+    // showScores is now managed by backend settings, no need for localStorage
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -91,15 +89,12 @@ export default function App() {
     fetchStats();
   };
 
-  const handleToggleScores = (show: boolean) => {
-    setShowScores(show);
-    localStorage.setItem('showScores', JSON.stringify(show));
-    
-    // If hiding scores, switch to dashboard or chat if on scores tab
-    if (!show && activeTab === 'scores') {
+  // Handle tab change when scores are hidden
+  useEffect(() => {
+    if (!showScores && activeTab === 'scores') {
       setActiveTab('dashboard');
     }
-  };
+  }, [showScores, activeTab]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -291,8 +286,6 @@ export default function App() {
         <SettingsModal 
           isOpen={showSettings}
           onClose={() => setShowSettings(false)}
-          showScores={showScores}
-          onToggleScores={handleToggleScores}
         />
       </div>
     </div>
