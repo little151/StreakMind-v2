@@ -24,7 +24,7 @@ export interface AppSettings {
 export function useSettings() {
   return useQuery<AppSettings>({
     queryKey: ['/api/settings'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0, // Always refetch when cache is invalidated for immediate UI updates
   });
 }
 
