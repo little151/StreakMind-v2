@@ -1,0 +1,67 @@
+You are the development agent for **StreakMind-v2**. The following updates and changes need to be introduced and implemented in the app. Carefully understand the scope and generate code + UI/UX updates accordingly.  
+
+## 🔑 Key Updates & Fixes  
+
+### 1. Memory for the Bot  
+- Introduce a **memory system** for the chat assistant.  
+- Memory should allow the bot to **retain necessary context across sessions**.  
+- Store minimal but key information for **personalized responses** (e.g., user name, preferences, recurring activities).  
+- Use a lightweight **memory.json** (or similar file) in the directory to persist this info during the testing phase.  
+
+### 2. Chat System Improvements  
+- **Chat persistence:** Save and load chat history from a `chats.json` file. Refreshing the page should not clear chat.  
+- **Efficient chat management:**  
+  - Allow users to **select and delete specific chats**.  
+  - Add a **bulk delete** option.  
+- Ensure the **chat input box always has the cursor active** (before and after sending).  
+- Make the chat interface smooth with **animated transitions** for messages (e.g., fade-in or slide-up).  
+
+### 3. Dashboard Enhancements (UI/UX)  
+- **Fix broken dashboard (blank screen issue).**  
+- Ensure **activity tiles**:  
+  - Can be **deleted** properly.  
+  - **Edit panel** saves changes (renaming & visualization type).  
+  - Visualization updates (heatmap, bar, progress, pie) are **saved and reflected** in the dashboard.  
+- Add subtle **animations & transitions** for a modern, dynamic feel (hover effects, smooth updates).  
+- Keep dashboard **interactive and fluid**, no static blank screen.  
+
+### 4. Settings Persistence  
+- Current settings reset on refresh.  
+- Introduce a `settings.json` file to **persist user preferences**.  
+- Settings should be **synced across sessions** (dark mode, chat toggle, etc.).  
+
+### 5. Remove Father Mode  
+- **Completely remove "Father Mode"** from app, codebase, and settings.  
+- Ensure no UI remnants or logic references remain.  
+
+---
+
+## 🎨 UX/UI Requirements  
+- Replace static tile UI with **animated, dynamic components**.  
+- Smooth **page transitions and element animations** (e.g., when adding/editing/deleting activities, when settings update).  
+- Keep dashboard and chat **engaging but minimal**.  
+
+---
+
+## 📌 Development Notes  
+- Use lightweight **JSON-based persistence** (`chats.json`, `settings.json`, `memory.json`) for now since this is a testing phase.  
+- Ensure CRUD operations (Create, Read, Update, Delete) for:  
+  - Chats  
+  - Settings  
+  - Activities  
+- Optimize for **efficiency, clean UX, and reliability**.  
+
+---
+
+## 🛈 Update Info Button ("i")  
+Update the **info/help section** to explain the new features:  
+- Bot now has **memory** for personalized interactions.  
+- Chats are **persistent** and can be **selected/deleted individually or in bulk**.  
+- Dashboard activities can be **renamed, deleted, and switched between visualizations**.  
+- Settings are now **saved across sessions**.  
+- App is **animation-enhanced** for smoother experience.  
+- "Father Mode" has been removed permanently.  
+
+---
+
+⚡ Make sure all these changes are integrated, tested, and reflected in the app with clean UI/UX and working persistence.  
