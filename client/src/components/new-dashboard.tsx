@@ -22,6 +22,14 @@ interface Stats {
     points: number;
     timestamp: string;
   }>;
+  activities: Record<string, {
+    id: string;
+    name: string;
+    customPoints?: number;
+    createdAt: string;
+    description?: string;
+    visualizationType: 'heatmap' | 'bar' | 'progress' | 'pie';
+  }>;
 }
 
 interface NewDashboardProps {
@@ -33,6 +41,9 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
   const [newActivityName, setNewActivityName] = useState("");
   const [selectedVisualization, setSelectedVisualization] = useState<'heatmap' | 'bar' | 'progress' | 'pie'>('heatmap');
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [createActivityName, setCreateActivityName] = useState("");
+  const [createVisualization, setCreateVisualization] = useState<'heatmap' | 'bar' | 'progress' | 'pie'>('heatmap');
 
   if (!stats) {
     return (
@@ -66,10 +77,23 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
     },
   });
 
+  const createActivityMutation = useMutation({
+    mutationFn: async ({ name, visualizationType }: { name: string; visualizationType: string }) => {
+      const response = await apiRequest('POST', '/api/activities', { name, visualizationType });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+      setIsCreateDialogOpen(false);
+      setCreateActivityName("");
+      setCreateVisualization('heatmap');
+    },
+  });
+
   const handleEditActivity = (activityName: string) => {
     setEditingActivity(activityName);
     setNewActivityName(activityName);
-    setSelectedVisualization(getVisualizationType(activityName));
+    setSelectedVisualization(stats?.activities[activityName]?.visualizationType || 'heatmap');
     setIsEditDialogOpen(true);
   };
 
@@ -87,7 +111,7 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
         updates.name = newActivityName.trim();
       }
       
-      if (selectedVisualization !== getVisualizationType(editingActivity)) {
+      if (selectedVisualization !== (stats?.activities[editingActivity]?.visualizationType || 'heatmap')) {
         updates.visualizationType = selectedVisualization;
       }
       
@@ -102,23 +126,23 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
     }
   };
 
+  const handleCreateActivity = () => {
+    if (createActivityName.trim()) {
+      createActivityMutation.mutate({
+        name: createActivityName.trim(),
+        visualizationType: createVisualization
+      });
+    }
+  };
+
   // Get unique activities and their data
-  const activities = Object.keys(stats.streaks);
+  const activities = Object.keys(stats.activities);
   
   // Calculate points per activity
   const getActivityPoints = (activity: string) => {
     return stats.logs
       .filter(log => log.activity === activity)
       .reduce((total, log) => total + log.points, 0);
-  };
-
-  // Determine visualization type for each activity
-  const getVisualizationType = (activity: string): 'heatmap' | 'bar' | 'progress' | 'pie' => {
-    const activityLower = activity.toLowerCase();
-    if (activityLower.includes('coding') || activityLower.includes('code')) return 'heatmap';
-    if (activityLower.includes('gym') || activityLower.includes('workout')) return 'progress';
-    if (activityLower.includes('sleep')) return 'bar';
-    return 'pie';
   };
 
   return (
@@ -131,9 +155,16 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
             <h2 className="text-2xl font-bold text-foreground">Your Habits</h2>
             <p className="text-muted-foreground">Track your progress across all activities</p>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-accent">{stats.totalPoints}</div>
-            <div className="text-sm text-muted-foreground">Total Points</div>
+          <div className="flex items-center gap-4">
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button data-testid="button-create-activity">Create Activity</Button>
+              </DialogTrigger>
+            </Dialog>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-accent">{stats.totalPoints}</div>
+              <div className="text-sm text-muted-foreground">Total Points</div>
+            </div>
           </div>
         </div>
 
@@ -147,7 +178,7 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
                 streak={stats.streaks[activity] || 0}
                 recentLogs={stats.logs}
                 totalPoints={getActivityPoints(activity)}
-                visualization={getVisualizationType(activity)}
+                visualization={stats.activities[activity]?.visualizationType || 'heatmap'}
                 onEdit={handleEditActivity}
                 onDelete={handleDeleteActivity}
               />
@@ -205,10 +236,63 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
                 </Button>
                 <Button
                   onClick={handleSaveEdit}
-                  disabled={(!newActivityName.trim() || (newActivityName === editingActivity && selectedVisualization === getVisualizationType(editingActivity || ''))) || updateActivityMutation.isPending}
+                  disabled={(!newActivityName.trim() || (newActivityName === editingActivity && selectedVisualization === (stats?.activities[editingActivity || '']?.visualizationType || 'heatmap'))) || updateActivityMutation.isPending}
                   data-testid="button-save-edit"
                 >
                   {updateActivityMutation.isPending ? "Saving..." : "Save"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Activity Dialog */}
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Activity</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="create-activity-name">Activity Name</Label>
+                <Input
+                  id="create-activity-name"
+                  value={createActivityName}
+                  onChange={(e) => setCreateActivityName(e.target.value)}
+                  placeholder="Enter activity name"
+                  data-testid="input-create-activity-name"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="create-visualization-type">Visualization Type</Label>
+                <Select value={createVisualization} onValueChange={(value: 'heatmap' | 'bar' | 'progress' | 'pie') => setCreateVisualization(value)}>
+                  <SelectTrigger data-testid="select-create-visualization-type">
+                    <SelectValue placeholder="Select visualization type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="heatmap">🗓️ Heatmap Calendar</SelectItem>
+                    <SelectItem value="bar">📊 Bar Chart</SelectItem>
+                    <SelectItem value="progress">🎯 Progress Ring</SelectItem>
+                    <SelectItem value="pie">🥧 Pie Chart</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateDialogOpen(false)}
+                  data-testid="button-cancel-create"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreateActivity}
+                  disabled={!createActivityName.trim() || createActivityMutation.isPending}
+                  data-testid="button-create-activity-submit"
+                >
+                  {createActivityMutation.isPending ? "Creating..." : "Create"}
                 </Button>
               </div>
             </div>

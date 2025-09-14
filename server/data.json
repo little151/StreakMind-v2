@@ -111,16 +111,6 @@
       "points": 3
     },
     {
-      "id": "6faf2e6f-fcbc-4562-8dfe-cfab4568c351",
-      "activity": "gamin",
-      "amount": 1,
-      "unit": "minutes",
-      "date": "2025-09-06",
-      "message": "i want to delete Gamin",
-      "timestamp": "2025-09-06T22:56:00.919Z",
-      "points": 0
-    },
-    {
       "id": "f6a7ff19-7dc4-4f50-a2fd-cd9fc8b3eff7",
       "activity": "gym",
       "amount": 1,
@@ -203,9 +193,34 @@
     "coding": 2,
     "gym": 3,
     "gaming": 1,
-    "gamin": 1
+    "meditation": 0
   },
-  "activities": {},
+  "activities": {
+    "coding": {
+      "id": "64b65ce2-86d9-4b75-b528-41be4853d061",
+      "name": "coding",
+      "createdAt": "2025-09-14T15:46:40.368Z",
+      "visualizationType": "heatmap"
+    },
+    "gym": {
+      "id": "6107be28-c69d-4def-870a-2d10d7dfd5d3",
+      "name": "gym",
+      "createdAt": "2025-09-14T15:46:41.545Z",
+      "visualizationType": "progress"
+    },
+    "gaming": {
+      "id": "417b84c7-e5d9-4191-a346-ee74f36f0844",
+      "name": "gaming",
+      "createdAt": "2025-09-14T15:46:41.782Z",
+      "visualizationType": "pie"
+    },
+    "meditation": {
+      "id": "4259d0c0-6094-405d-bb2b-cb1f9df78826",
+      "name": "meditation",
+      "createdAt": "2025-09-14T15:49:46.380Z",
+      "visualizationType": "bar"
+    }
+  },
   "settings": {
     "showScores": true,
     "enabledPersonalities": {
