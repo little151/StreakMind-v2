@@ -728,7 +728,7 @@ export function createApiRouter(genai: any) {
   // Get dashboard layout
   router.get("/dashboard/layout", (req, res) => {
     try {
-      const layoutFile = path.join(__dirname, 'dashboard.json');
+      const layoutFile = 'dashboard.json';
       
       if (!fs.existsSync(layoutFile)) {
         return res.json({ activityOrder: [] });
@@ -751,7 +751,7 @@ export function createApiRouter(genai: any) {
         return res.status(400).json({ error: "activityOrder must be an array" });
       }
       
-      const layoutFile = path.join(__dirname, 'dashboard.json');
+      const layoutFile = 'dashboard.json';
       const layout = { activityOrder, updatedAt: new Date().toISOString() };
       
       fs.writeFileSync(layoutFile, JSON.stringify(layout, null, 2));

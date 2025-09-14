@@ -1,5 +1,5 @@
 {
-  "showScores": true,
+  "showScores": false,
   "enabledPersonalities": {
     "therapist": true,
     "friend": true,
