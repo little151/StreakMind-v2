@@ -48,7 +48,10 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
   if (!stats) {
     return (
       <div className="h-full p-6 overflow-y-auto bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Loading dashboard...</div>
+        <div className="text-center animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <div className="text-muted-foreground">Loading dashboard...</div>
+        </div>
       </div>
     );
   }
@@ -158,7 +161,7 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
           <div className="flex items-center gap-4">
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button data-testid="button-create-activity">Create Activity</Button>
+                <Button className="button-scale" data-testid="button-create-activity">Create Activity</Button>
               </DialogTrigger>
             </Dialog>
             <div className="text-right">
@@ -170,8 +173,8 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
 
         {/* Activity Tiles Grid */}
         {activities.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-            {activities.map(activity => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6 stagger-children">
+            {activities.map((activity, index) => (
               <ActivityTile
                 key={activity}
                 activity={activity}
@@ -181,12 +184,13 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
                 visualization={stats.activities[activity]?.visualizationType || 'heatmap'}
                 onEdit={handleEditActivity}
                 onDelete={handleDeleteActivity}
+                style={{ animationDelay: `${index * 50}ms` }}
               />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-12 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
               <TrendingUp className="h-8 w-8 text-muted-foreground" />
             </div>
             <h3 className="text-lg font-medium text-foreground mb-2">No habits yet</h3>

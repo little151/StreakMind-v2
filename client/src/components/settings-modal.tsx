@@ -29,8 +29,12 @@ export default function SettingsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" data-testid="modal-settings">
-      <div className="bg-card border border-border rounded-lg p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-in fade-in-0 duration-200" 
+      data-testid="modal-settings"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-card border border-border rounded-lg p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom-4 fade-in-0 zoom-in-95 duration-300">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
@@ -100,8 +104,12 @@ export default function SettingsModal({
                 { key: 'therapist', label: 'Therapist', icon: Heart, description: 'Warm, empathetic support' },
                 { key: 'friend', label: 'Friend', icon: Users, description: 'Casual, friendly encouragement' },
                 { key: 'trainer', label: 'Trainer', icon: Dumbbell, description: 'High-energy motivation' },
-              ].map(({ key, label, icon: Icon, description }) => (
-                <div key={key} className="flex items-center justify-between py-2">
+              ].map(({ key, label, icon: Icon, description }, index) => (
+                <div 
+                  key={key} 
+                  className="flex items-center justify-between py-2 animate-in slide-in-from-left-4 fade-in-0 duration-200"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                   <div className="flex items-center gap-3">
                     <Icon className="h-4 w-4 text-accent" />
                     <div>
@@ -148,7 +156,7 @@ export default function SettingsModal({
         <div className="mt-6 flex justify-end">
           <button 
             onClick={onClose} 
-            className="px-4 py-2 bg-accent text-accent-foreground rounded hover:bg-accent/90 transition-colors"
+            className="px-4 py-2 bg-accent text-accent-foreground rounded hover:bg-accent/90 transition-all duration-200 hover:scale-105 active:scale-95"
             data-testid="button-close-settings-footer"
           >
             Done

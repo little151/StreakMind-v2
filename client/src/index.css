@@ -197,7 +197,82 @@
 }
 
 .progress-animated {
-  animation: progressFill 1s ease-out;
+  animation: progressFill 0.8s ease-out;
+}
+
+/* Enhanced button animations */
+.button-scale {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button-scale:hover {
+  transform: scale(1.02);
+}
+
+.button-scale:active {
+  transform: scale(0.98);
+}
+
+/* Stagger animation utilities */
+.stagger-children > * {
+  opacity: 0;
+  animation: slideInUp 0.4s ease-out forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+
+/* Activity tile enhanced animations */
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.activity-tile-enter {
+  animation: slideInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Delete animation */
+@keyframes slideOutScale {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+}
+
+.activity-tile-exit {
+  animation: slideOutScale 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading shimmer effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
 }
 
 /* Button enhancements */

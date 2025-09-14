@@ -418,8 +418,8 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center text-muted-foreground">
-              <Bot className="h-12 w-12 mx-auto mb-4 text-muted-foreground/60" />
+            <div className="text-center text-muted-foreground animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
+              <Bot className="h-12 w-12 mx-auto mb-4 text-muted-foreground/60 animate-pulse" />
               <p className="text-lg mb-2 text-foreground font-medium">Start tracking your habits!</p>
               <p className="text-sm">Try: "Did 2 coding questions" or "Went to gym"</p>
             </div>
@@ -512,7 +512,7 @@ export default function NewChatInterface({ onStatsUpdate }: NewChatInterfaceProp
           <Button
             onClick={sendMessage}
             disabled={isLoading || !inputValue.trim()}
-            className="bg-accent hover:bg-accent/90 text-accent-foreground"
+            className="bg-accent hover:bg-accent/90 text-accent-foreground button-scale transition-all duration-200"
           >
             <Send className="h-4 w-4" />
           </Button>

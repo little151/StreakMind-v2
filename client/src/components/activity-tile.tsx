@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Trophy, Zap, Calendar, TrendingUp, Edit, Trash2 } from "lucide-react";
 
-interface ActivityTileProps {
+interface ActivityTileProps extends React.HTMLAttributes<HTMLDivElement> {
   activity: string;
   streak: number;
   recentLogs: Array<{
@@ -28,7 +28,10 @@ export default function ActivityTile({
   visualization,
   customPoints,
   onEdit,
-  onDelete
+  onDelete,
+  style,
+  className,
+  ...rest
 }: ActivityTileProps) {
   const [showActions, setShowActions] = useState(false);
   const activityLogs = recentLogs.filter(log => log.activity === activity);
@@ -207,10 +210,12 @@ export default function ActivityTile({
 
   return (
     <div 
-      className="bg-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-all duration-200 hover:border-accent/20 card-hover group" 
+      className={`bg-card rounded-xl shadow-sm border border-border p-4 hover:shadow-md transition-all duration-300 hover:border-accent/20 card-hover group activity-tile-enter hover:scale-[1.02] ${className || ''}`}
+      style={style}
       data-testid={`tile-${activity}`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
+      {...rest}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
