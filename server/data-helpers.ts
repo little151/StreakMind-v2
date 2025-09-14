@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 
 const DATA_FILE = "./server/data.json";
 const CHAT_FILE = "./server/chatData.json";
+const MEMORY_FILE = "./server/memory.json";
 
 // Data structure interface
 export interface LogEntry {
@@ -21,6 +22,31 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   message: string;
   timestamp: string;
+}
+
+export interface UserMemory {
+  id: string;
+  name?: string;
+  preferences: {
+    preferredActivities: string[];
+    timeOfDay: string; // morning, afternoon, evening
+    personalityPreference: 'therapist' | 'friend' | 'trainer' | 'adaptive';
+    motivationStyle: 'gentle' | 'encouraging' | 'intense';
+  };
+  personalContext: {
+    goals: string[];
+    challenges: string[];
+    achievements: string[];
+    recurringPatterns: string[];
+  };
+  conversationContext: {
+    lastSession: string;
+    commonTopics: string[];
+    strugglingWith: string[];
+    celebrating: string[];
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Activity {
@@ -397,4 +423,140 @@ export function deleteChatMessage(messageId: string): ChatMessage[] {
 export function clearAllChatMessages(): ChatMessage[] {
   saveChatData([]);
   return [];
+}
+
+// Memory management functions
+export function loadMemory(): UserMemory {
+  try {
+    const data = JSON.parse(fs.readFileSync(MEMORY_FILE, "utf8"));
+    return data;
+  } catch {
+    // Create default memory structure
+    const defaultMemory: UserMemory = {
+      id: randomUUID(),
+      preferences: {
+        preferredActivities: [],
+        timeOfDay: 'adaptive',
+        personalityPreference: 'adaptive',
+        motivationStyle: 'encouraging'
+      },
+      personalContext: {
+        goals: [],
+        challenges: [],
+        achievements: [],
+        recurringPatterns: []
+      },
+      conversationContext: {
+        lastSession: new Date().toISOString(),
+        commonTopics: [],
+        strugglingWith: [],
+        celebrating: []
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    saveMemory(defaultMemory);
+    return defaultMemory;
+  }
+}
+
+export function saveMemory(memory: UserMemory) {
+  memory.updatedAt = new Date().toISOString();
+  fs.writeFileSync(MEMORY_FILE, JSON.stringify(memory, null, 2));
+}
+
+export function updateMemoryFromMessage(message: string, isUserMessage: boolean): UserMemory {
+  const memory = loadMemory();
+  
+  if (!isUserMessage) return memory;
+  
+  const text = message.toLowerCase().trim();
+  const now = new Date().toISOString();
+  memory.conversationContext.lastSession = now;
+  
+  // Extract user name if mentioned
+  const nameMatch = text.match(/my name is (\w+)|i'm (\w+)|call me (\w+)/);
+  if (nameMatch) {
+    memory.name = nameMatch[1] || nameMatch[2] || nameMatch[3];
+  }
+  
+  // Detect goals
+  const goalPatterns = [
+    /want to (\w+)/,
+    /goal is to (\w+)/,
+    /trying to (\w+)/,
+    /hope to (\w+)/
+  ];
+  
+  goalPatterns.forEach(pattern => {
+    const match = text.match(pattern);
+    if (match && !memory.personalContext.goals.includes(match[1])) {
+      memory.personalContext.goals.push(match[1]);
+    }
+  });
+  
+  // Detect challenges/struggles
+  const challengeKeywords = ['struggle', 'hard time', 'difficult', 'tough', 'challenging', 'can\'t', 'problem'];
+  challengeKeywords.forEach(keyword => {
+    if (text.includes(keyword) && !memory.conversationContext.strugglingWith.includes(keyword)) {
+      memory.conversationContext.strugglingWith.push(keyword);
+    }
+  });
+  
+  // Detect celebrations/achievements
+  const celebrationKeywords = ['great', 'awesome', 'amazing', 'proud', 'accomplished', 'succeeded', 'nailed'];
+  celebrationKeywords.forEach(keyword => {
+    if (text.includes(keyword) && !memory.conversationContext.celebrating.includes(keyword)) {
+      memory.conversationContext.celebrating.push(keyword);
+    }
+  });
+  
+  // Track preferred activities
+  const currentActivities = Object.keys(loadData().streaks);
+  currentActivities.forEach(activity => {
+    if (text.includes(activity.toLowerCase()) && !memory.preferences.preferredActivities.includes(activity)) {
+      memory.preferences.preferredActivities.push(activity);
+    }
+  });
+  
+  // Detect time preferences
+  if (text.includes('morning')) memory.preferences.timeOfDay = 'morning';
+  else if (text.includes('afternoon') || text.includes('lunch')) memory.preferences.timeOfDay = 'afternoon';
+  else if (text.includes('evening') || text.includes('night')) memory.preferences.timeOfDay = 'evening';
+  
+  // Keep arrays reasonable size
+  memory.conversationContext.strugglingWith = memory.conversationContext.strugglingWith.slice(-10);
+  memory.conversationContext.celebrating = memory.conversationContext.celebrating.slice(-10);
+  memory.preferences.preferredActivities = memory.preferences.preferredActivities.slice(-15);
+  
+  saveMemory(memory);
+  return memory;
+}
+
+export function getMemoryContext(): string {
+  const memory = loadMemory();
+  
+  let context = '';
+  
+  if (memory.name) {
+    context += `User's name: ${memory.name}. `;
+  }
+  
+  if (memory.preferences.preferredActivities.length > 0) {
+    context += `Preferred activities: ${memory.preferences.preferredActivities.slice(-5).join(', ')}. `;
+  }
+  
+  if (memory.personalContext.goals.length > 0) {
+    context += `Goals: ${memory.personalContext.goals.slice(-3).join(', ')}. `;
+  }
+  
+  if (memory.conversationContext.strugglingWith.length > 0) {
+    context += `Recently struggling with: ${memory.conversationContext.strugglingWith.slice(-3).join(', ')}. `;
+  }
+  
+  if (memory.conversationContext.celebrating.length > 0) {
+    context += `Recently celebrating: ${memory.conversationContext.celebrating.slice(-3).join(', ')}. `;
+  }
+  
+  return context.trim();
 }

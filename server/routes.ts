@@ -17,10 +17,15 @@ import {
   addChatMessage,
   deleteChatMessage,
   clearAllChatMessages,
+  loadMemory,
+  saveMemory,
+  updateMemoryFromMessage,
+  getMemoryContext,
   type LogEntry,
   type Activity,
   type AppData,
   type ChatMessage,
+  type UserMemory,
 } from "./data-helpers";
 
 // Enhanced personality system functions
@@ -62,12 +67,16 @@ function buildEnhancedPrompt(
   streakUpdated: boolean,
   isGeneralQuery: boolean = false
 ): string {
+  // Get memory context for personalized responses
+  const memoryContext = getMemoryContext();
+  
   // For general queries unrelated to habit tracking, behave as a normal AI assistant
   if (isGeneralQuery) {
-    return `You are a helpful AI assistant powered by Gemini. Answer the user's question naturally and helpfully. You can discuss any topic, provide information, help with tasks, or have casual conversation. Be knowledgeable, friendly, and engaging.`;
+    const personalContext = memoryContext ? ` Remember: ${memoryContext}` : '';
+    return `You are a helpful AI assistant powered by Gemini. Answer the user's question naturally and helpfully. You can discuss any topic, provide information, help with tasks, or have casual conversation. Be knowledgeable, friendly, and engaging.${personalContext}`;
   }
 
-  const baseContext = `Current user stats: ${Object.keys(data.streaks).length} active habits, highest streak: ${Math.max(...Object.values(data.streaks) as number[], 0)} days.`;
+  const baseContext = `Current user stats: ${Object.keys(data.streaks).length} active habits, highest streak: ${Math.max(...Object.values(data.streaks) as number[], 0)} days. ${memoryContext ? `Personal context: ${memoryContext}` : ''}`;
   
   // Filter enabled personalities
   const enabledPersonalities = Object.entries(data.settings.enabledPersonalities)
@@ -186,6 +195,9 @@ export function createApiRouter(genai: any) {
         timestamp: new Date().toISOString(),
       };
       addChatMessage(userMessage);
+      
+      // Update memory with user message
+      updateMemoryFromMessage(content, true);
 
       // Check for dynamic activity creation first
       const newActivity = handleDynamicActivityCreation(content, data);
@@ -215,6 +227,9 @@ export function createApiRouter(genai: any) {
           timestamp: new Date().toISOString(),
         };
         addChatMessage(botMessage);
+        
+        // Update memory with bot response context
+        updateMemoryFromMessage(activityReply, false);
         saveData(data);
         
         return res.json({ reply: activityReply, newActivity, activityCreated: true });
@@ -336,6 +351,9 @@ export function createApiRouter(genai: any) {
         timestamp: new Date().toISOString(),
       };
       addChatMessage(botMessage);
+      
+      // Update memory with bot response context
+      updateMemoryFromMessage(reply, false);
       saveData(data);
 
       res.json({
@@ -554,6 +572,17 @@ export function createApiRouter(genai: any) {
       });
     } catch (error) {
       console.error("Stats endpoint error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // -------------------- Memory Endpoint --------------------
+  router.get("/memory", (req, res) => {
+    try {
+      const memory = loadMemory();
+      res.json(memory);
+    } catch (error) {
+      console.error("Memory endpoint error:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });
