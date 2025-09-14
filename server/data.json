@@ -182,7 +182,8 @@
   "streaks": {
     "coding": 2,
     "gym": 3,
-    "meditation": 0
+    "meditation": 0,
+    "Typing": 0
   },
   "activities": {
     "coding": {
@@ -202,6 +203,12 @@
       "name": "meditation",
       "createdAt": "2025-09-14T15:49:46.380Z",
       "visualizationType": "bar"
+    },
+    "Typing": {
+      "id": "a7a5715e-6e24-4d62-be79-25fc411e04f0",
+      "name": "Typing",
+      "createdAt": "2025-09-14T17:57:44.068Z",
+      "visualizationType": "heatmap"
     }
   }
 }
