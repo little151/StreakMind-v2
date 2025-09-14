@@ -5,6 +5,8 @@ import { useSettings, useUpdateSettings, useResetSettings } from "../hooks/use-s
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  showScores?: boolean;
+  onToggleScores?: (show: boolean) => void;
 }
 
 export default function SettingsModal({ 

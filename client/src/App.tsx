@@ -19,6 +19,14 @@ interface Stats {
     points: number;
     timestamp: string;
   }>;
+  activities: Record<string, {
+    id: string;
+    name: string;
+    customPoints?: number;
+    createdAt: string;
+    description?: string;
+    visualizationType: 'heatmap' | 'bar' | 'progress' | 'pie';
+  }>;
 }
 
 type Tab = 'chat' | 'dashboard' | 'scores';
