@@ -29,7 +29,7 @@ export interface UserMemory {
 export function useMemory() {
   return useQuery<UserMemory>({
     queryKey: ['/api/memory'],
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0, // Always refetch when cache is invalidated for immediate UI updates
   });
 }
 
