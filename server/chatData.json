@@ -95,6 +95,30 @@
       "role": "assistant",
       "message": "Hi little! How's it going today?  What can I help you with?",
       "timestamp": "2025-09-14T19:01:10.625Z"
+    },
+    {
+      "id": "e34e4e5f-7812-4e0f-8b34-362a37f7e15f",
+      "role": "user",
+      "message": "sup?",
+      "timestamp": "2025-09-14T19:02:40.805Z"
+    },
+    {
+      "id": "b85ada5b-b4cb-4c12-b805-d57044dc7705",
+      "role": "assistant",
+      "message": "Not much, just hanging out and ready to assist!  What's up with you?  Anything I can help you with today?",
+      "timestamp": "2025-09-14T19:02:41.499Z"
+    },
+    {
+      "id": "33ccd5d6-ee46-4a04-a133-a80f7094f205",
+      "role": "user",
+      "message": "do you remember y name?",
+      "timestamp": "2025-09-14T19:03:00.661Z"
+    },
+    {
+      "id": "37f464c4-d6b5-4a0b-9aed-ac668c84bde7",
+      "role": "assistant",
+      "message": "I don't have memory of past conversations.  Each time we interact, it's like meeting for the first time.  So, to answer your question directly: no, I don't remember your name.  If you'd like to tell me your name, I'd be happy to learn it!",
+      "timestamp": "2025-09-14T19:03:01.678Z"
     }
   ]
 }
