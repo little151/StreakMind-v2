@@ -139,7 +139,7 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
   };
 
   // Get unique activities and their data
-  const activities = Object.keys(stats.activities);
+  const activities = Object.keys(stats.activities || {});
   
   // Calculate points per activity
   const getActivityPoints = (activity: string) => {
@@ -197,6 +197,7 @@ export default function NewDashboard({ stats }: NewDashboardProps) {
             <p className="text-muted-foreground mb-4">Start by chatting about your activities or creating new habits</p>
           </div>
         )}
+        
 
         {/* Edit Activity Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
